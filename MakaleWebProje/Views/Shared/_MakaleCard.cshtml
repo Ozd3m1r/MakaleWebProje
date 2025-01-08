@@ -1,0 +1,29 @@
+﻿@model Makale
+
+@*
+
+https://i.kym-cdn.com/photos/images/newsfeed/001/857/763/672.jpg
+*@
+<div class="col-sm-12 col-md-4  my-2">
+    <div class="card" style="width: 10rem;">
+        <img src="@Model?.MakaleImagesUrl" style="width:150px;height:150px;">
+        <div class="card-body">
+            <h5 class="card-title">@Model.MakaleName</h5>
+            <p class="card-text">@Model.MakaleSummary</p>
+
+            <div class="btn btn-group">
+                <form id="@Model.MakaleId" asp-page="/Cart" method="post">
+                    <input type="hidden" asp-for="MakaleId" />
+                    <input type="hidden" name="returnUrl" value="/Makale/Get/@ViewContext" />
+                    <button type="submit" class=" btn btn-outline-primary">
+
+                        Sepete Ekle
+                    </button>
+                </form>
+                <a href="Makale/get/@Model.MakaleId" class="btn btn-primary">Get Details</a>
+            </div>
+
+
+        </div>
+    </div>
+</div>

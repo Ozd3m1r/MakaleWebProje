@@ -1,0 +1,14 @@
+﻿@model IEnumerable<Makale>
+
+
+<div class="display-6 text-center">
+    <h6>ShowCase</h6>
+
+</div>
+<div class="row">
+
+    @foreach (var mak in Model)
+    {
+        <partial name="_MakaleCard" model="mak" />
+    }
+</div>

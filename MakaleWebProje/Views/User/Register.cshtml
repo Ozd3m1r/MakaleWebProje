@@ -1,0 +1,31 @@
+﻿@model Entities.Dtos.UserDtoInsertion
+
+<h2>Kayıt Ol</h2>
+<form asp-action="Register" method="post">
+    <div>
+        <label for="Name">Ad:</label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+    <div>
+        <label for="SurName">Soyad:</label>
+        <input asp-for="SurName" class="form-control" />
+        <span asp-validation-for="SurName" class="text-danger"></span>
+    </div>
+    <div>
+        <label for="Email">Email:</label>
+        <input asp-for="Email" type="email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+    <div>
+        <label for="UserName">Kullanıcı Adı:</label>
+        <input asp-for="UserName" class="form-control" />
+        <span asp-validation-for="UserName" class="text-danger"></span>
+    </div>
+    <div>
+        <label for="Password">Şifre:</label>
+        <input asp-for="Password" type="password" class="form-control" />
+        <span asp-validation-for="Password" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">Kayıt Ol</button>
+</form>

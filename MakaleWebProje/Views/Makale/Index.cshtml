@@ -1,0 +1,18 @@
+﻿@model IQueryable<Makale>
+<div class="row">
+    <div class="col-md-5">
+        @*await Component.InvokeAsync("CategoriesMenu")*@
+        <div class="col-md-2">
+            @*await Component.InvokeAsync("ProductFiltreMenu")*@
+
+        </div>
+    </div>
+    <div class="col-md-7  ">
+        <div class="row my-">
+            @foreach (Makale mak in Model)
+            {
+                <partial name="_MakaleCard" model="@mak" />
+            }
+        </div>
+    </div>
+</div>

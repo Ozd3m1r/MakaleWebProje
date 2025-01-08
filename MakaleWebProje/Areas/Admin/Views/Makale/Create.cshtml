@@ -1,0 +1,61 @@
+﻿@using MakaleWebProje.Areas.Admin.Model
+@using Entities.Dtos;
+@model MakaleDtoInsertion
+
+<h2>Makale Ekle</h2>
+<form asp-action="Create" method="post" enctype="multipart/form-data">
+    <div class="text-danger" asp-validation-summary="All"></div>
+
+    <div class="form-group">
+        <label asp-for="KategoriId">Kategori</label>
+        @if (ViewBag.Categories == null || !((List<Entities.Models.Kategori>)ViewBag.Categories).Any())
+        {
+            <div class="alert alert-danger">
+                Kategoriler yüklenemedi!
+            </div>
+        }
+        else
+        {
+            <select asp-for="KategoriId" class="form-control">
+                <option value="">Kategori Seçin</option>
+                @foreach (Entities.Models.Kategori kat in ViewBag.Categories)
+                {
+                    <option value="@kat.KategoriId">@kat.KategoriName</option>
+                }
+            </select>
+        }
+    </div>
+
+    <div class="form-group">
+        <label asp-for=Entities.Dtos.MakaleDtoInsertion.MakaleName>Makale Adı</label>
+        <input asp-for=Entities.Dtos.MakaleDtoInsertion.MakaleName class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="MakaleSummary">Makale Özeti</label>
+        <textarea asp-for="MakaleSummary" class="form-control"></textarea>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="MakaleDate">Makale Tarihi</label>
+        <input asp-for="MakaleDate" type="date" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="MakaleIsShow">Gösterilsin mi?</label>
+        <input asp-for="MakaleIsShow" type="checkbox" class="form-check-input" />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="MakaleImagesUrl">Görsel</label>
+        <input type="file" class="form-control-file" id="MakaleImagesUrl" name="file" />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="MakaleCarousel">Ana Sayfada Gösterilsin mi?</label>
+        <input asp-for="MakaleCarousel" type="checkbox" class="form-check-input" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Ekle</button>
+</form>
+

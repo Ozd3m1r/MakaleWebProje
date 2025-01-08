@@ -1,0 +1,41 @@
+﻿@model Makale
+@{
+    var likesCount = ViewBag.LikesCount;
+    var dislikesCount = ViewBag.DislikesCount;
+    var isUserLoggedIn = ViewBag.IsUserLoggedIn ?? false;
+}
+
+<div class="row">
+    <div class="cold-md-12">
+        <div class="text-center">
+            <h6 class="display-6">
+                <h3>@Model.MakaleName</h3>
+            </h6>
+            <img class="img-fluid shadow rounded-3" src="@Model.MakaleImagesUrl" alt="@Model.MakaleName" width="500" />
+            <p>@Model?.MakaleSummary</p>
+        </div>
+    </div>
+</div>
+
+<p></p>
+
+<div class="btn-group">
+    <a class="btn btn-primary" asp-controller="Makale" asp-action="Index">Back to list</a>
+    <a class="btn btn-outline-primary" asp-controller="Home" asp-action="Index">Home</a>
+
+    @if (isUserLoggedIn)
+    {
+        <!-- Beğeni ve Beğenmeme Butonları -->
+        <form action="@Url.Action("OnPostLike", "Makale", new { MakaleId = Model.MakaleId, returnUrl = ViewContext.HttpContext.Request.Path })" method="post">
+            <button type="submit" class="btn btn-success">Beğen (Likes: @likesCount)</button>
+        </form>
+
+        <form action="@Url.Action("OnPostDislike", "Makale", new { MakaleId = Model.MakaleId, returnUrl = ViewContext.HttpContext.Request.Path })" method="post">
+            <button type="submit" class="btn btn-danger">Beğenme (Dislikes: @dislikesCount)</button>
+        </form>
+    }
+    else
+    {
+        <p>Giriş yapmadınız, beğenme işlemi yapamazsınız. <a href="/User/Login">Giriş yap</a></p>
+    }
+</div>

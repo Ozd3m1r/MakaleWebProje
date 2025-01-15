@@ -47,8 +47,18 @@ namespace Repositories
             return FindAll(trackChanges)
                 .Where(m => m.MakaleCarousel.Equals(true));
         }
+        public IQueryable<Makale> GetMakaleIsShowHome(bool trackChanges)
+        {
+            return FindAll(trackChanges)
+                .Where(m => m.MakaleIsShowHome.Equals(true));
+        }
+        public IQueryable<Makale> GetMakaleIsShow(bool trackChanges)
+        {
+            return FindAll(trackChanges)
+                .Where(m => m.MakaleIsShow.Equals(true));
+        }
 
-        // Asenkron İşlemler
+        //Asenkron İşlemler
 
         // GetAllMakaleAsync
         public async Task<IEnumerable<Makale>> GetAllMakaleAsync(bool trackChanges)
@@ -77,11 +87,27 @@ namespace Repositories
             var query = FindAll(trackChanges).Where(m => m.MakaleCarousel.Equals(true));
             return await query.ToListAsync();
         }
-
+        // GetMakaleIsShowHomeAsync
+        public async Task<IEnumerable<Makale>> GetMakaleIsShowHomeAsync(bool trackChanges)
+        {
+            var querry =FindAll(trackChanges).Where(m=>m.MakaleIsShowHome.Equals(true));
+            return await querry.ToListAsync();
+        }
+        // GetMakaleIsShowAsync
+        public async Task<IEnumerable<Makale>> GetMakaleIsShowAsync(bool trackChanges)
+        {
+            var querry = FindAll(trackChanges).Where(m => m.MakaleIsShow.Equals(true));
+            return await querry.ToListAsync();
+        }
         // GetOneMakaleAsync
         public async Task<Makale?> GetOneMakaleAsync(int id, bool trackChanges)
         {
             return await FindByConditionAsync(m => m.MakaleId.Equals(id), trackChanges);
         }
+
+        
+
+   
     }
 }
+

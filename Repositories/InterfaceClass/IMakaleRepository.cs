@@ -12,11 +12,15 @@ namespace Repositories.InterfaceClass
         IQueryable<Makale> GetAllMakale(bool trackChanges);
         IQueryable<Makale> GetAllMakaleDetails(MakaleRequestParameters m);
         IQueryable<Makale> GetMakaleCarousel(bool trackChanges);
+        IQueryable<Makale> GetMakaleIsShowHome(bool trackChanges);
+        IQueryable<Makale> GetMakaleIsShow(bool trackChanges);
         Makale? GetOneMakale(int id,bool trackChanges);
 
         Task<IEnumerable<Makale>> GetAllMakaleAsync(bool trackChanges);
         Task<IEnumerable<Makale>> GetAllMakaleDetailsAsync(MakaleRequestParameters m);
         Task<IEnumerable<Makale>> GetMakaleCarouselAsync(bool trackChanges);
+        Task<IEnumerable<Makale>> GetMakaleIsShowHomeAsync(bool trackChanges);
+        Task<IEnumerable<Makale>> GetMakaleIsShowAsync(bool trackChanges);
         Task<Makale?> GetOneMakaleAsync(int id, bool trackChanges);
 
         void CreateMakale(Makale makale);

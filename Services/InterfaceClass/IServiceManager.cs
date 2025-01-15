@@ -12,5 +12,7 @@ namespace Services.InterfaceClass
         IMakaleServices MakaleServices { get; }
         IUsersServices UsersServices { get; }
         IMakaleDataServices MakaleDataServices { get; }
+        IUserRoleServices UserRoleServices { get; }
+        IMakaleCommentServices MakaleCommentServices { get; }
     }
 }

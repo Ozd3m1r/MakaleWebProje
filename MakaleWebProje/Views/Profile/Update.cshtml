@@ -1,39 +1,75 @@
-﻿@model Entities.Models.Users
+﻿@model UserDtoUpdate
+@{
+    ViewData["Title"] = "Profil Güncelle";
+}
 
-<h2>Profil Güncelle</h2>
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h3 class="mb-0">Profil Güncelle</h3>
+            <a href="@Url.Action("UserDetail", new { id = Model.Id })" class="btn btn-light">
+                <i class="bi bi-arrow-left"></i> Profile Dön
+            </a>
+        </div>
+        <div class="card-body">
+            <form asp-action="Update" method="post" class="needs-validation" novalidate>
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="Password" />
+                <input type="hidden" asp-for="UserRoleId" />
 
-<form asp-action="Update" method="post">
-    <input type="hidden" asp-for="UserId" />
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label">Ad</label>
+                            <input asp-for="Name" class="form-control" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
 
-    <div class="form-group">
-        <label for="Name">Ad:</label>
-        <input asp-for="Name" class="form-control" />
-        <span asp-validation-for="Name" class="text-danger"></span>
+                        <div class="mb-3">
+                            <label asp-for="SurName" class="form-label">Soyad</label>
+                            <input asp-for="SurName" class="form-control" />
+                            <span asp-validation-for="SurName" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label">Email</label>
+                            <input asp-for="Email" type="email" class="form-control" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="UserName" class="form-label">Kullanıcı Adı</label>
+                            <input asp-for="UserName" class="form-control" />
+                            <span asp-validation-for="UserName" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i>
+                        Değişiklikleri onaylamak için mevcut şifrenizi girmelisiniz.
+                    </div>
+                    <label asp-for="CurrentPassword" class="form-label">Mevcut Şifre</label>
+                    <input asp-for="CurrentPassword" type="password" class="form-control" />
+                    <span asp-validation-for="CurrentPassword" class="text-danger"></span>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-lg"></i> Güncelle
+                    </button>
+                    <a href="@Url.Action("UserDetail", new { id = Model.Id })" class="btn btn-secondary">
+                        <i class="bi bi-x"></i> İptal
+                    </a>
+                </div>
+            </form>
+        </div>
     </div>
+</div>
 
-    <div class="form-group">
-        <label for="SurName">Soyad:</label>
-        <input asp-for="SurName" class="form-control" />
-        <span asp-validation-for="SurName" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label for="Email">Email:</label>
-        <input asp-for="Email" type="email" class="form-control" />
-        <span asp-validation-for="Email" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label for="UserName">Kullanıcı Adı:</label>
-        <input asp-for="UserName" class="form-control" />
-        <span asp-validation-for="UserName" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label for="Password">Şifre:</label>
-        <input asp-for="Password" type="password" class="form-control" />
-        <span asp-validation-for="Password" class="text-danger"></span>
-    </div>
-
-    <button type="submit" class="btn btn-primary">Güncelle</button>
-</form>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+} 

@@ -1,16 +1,25 @@
-﻿@model Entities.Dtos.LoginDto
+﻿@model LoginDto
+@{
+    ViewData["Title"] = "Giriş Yap";
+}
 
-<h2>Giriş Yap</h2>
-<form asp-action="Login" method="post">
-    <div>
-        <label for="UserName">UserName:</label>
-        <input asp-for="UserName" type="UserName" class="form-control" />
-        <span asp-validation-for="UserName" class="text-danger"></span>
+<div class="container mt-5 animate__animated animate__slideInRight">
+    <div class="p-4 bg-light bg-opacity-75 rounded shadow" style="width: 400px; margin: auto;">
+        <h2 class="text-center mb-4">Giriş Yap</h2>
+        <form asp-action="Login" method="post">
+            <div class="mb-3">
+                <label for="UserName" class="form-label">Kullanıcı Adı</label>
+                <input asp-for="UserName" type="UserName" class="form-control" />
+                <span asp-validation-for="UserName" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label for="Password" class="form-label">Şifre</label>
+                <input asp-for="Password" type="password" class="form-control" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="bi bi-box-arrow-in-right"></i> Giriş Yap
+            </button>
+        </form>
     </div>
-    <div>
-        <label for="Password">Şifre:</label>
-        <input asp-for="Password" type="password" class="form-control" />
-        <span asp-validation-for="Password" class="text-danger"></span>
-    </div>
-    <button type="submit" class="btn btn-primary">Giriş Yap</button>
-</form>
+</div>

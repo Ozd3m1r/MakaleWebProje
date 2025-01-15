@@ -1,5 +1,60 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model IEnumerable<Makale>
+@{
+    ViewData["Title"] = "Ana Sayfa";
 }
 
 @await Component.InvokeAsync("MakaleCarousel")
+
+<!-- Ana Sayfa Makaleleri -->
+<div class="container mt-5">
+    <div class="showcase-section">
+        <h2 class="text-center mb-4">Öne Çıkan Makaleler</h2>
+        <div class="row g-4">
+            @foreach (var mak in Model)
+            {
+                <div class="col-md-4">
+                    <div class="card h-100 shadow-sm">
+                        <img src="@mak.MakaleImagesUrl" class="card-img-top" alt="@mak.MakaleName"
+                             style="height: 200px; object-fit: cover;">
+                        <div class="card-body">
+                            <h5 class="card-title">@mak.MakaleName</h5>
+                            <p class="card-text">@(mak.MakaleSummary?.Length > 100 ? mak.MakaleSummary.Substring(0, 100) + "..." : mak.MakaleSummary)</p>
+                            <a href="@Url.Action("Get", "Makale", new { id = mak.MakaleId })" class="btn btn-outline-primary">
+                                Devamını Oku
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        transition: all 0.3s ease;
+        border: none;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 .5rem 1rem rgba(0,0,0,.15) !important;
+    }
+
+    .showcase-section {
+        animation: fadeIn 1s ease-in;
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style> 

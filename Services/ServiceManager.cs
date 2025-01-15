@@ -13,15 +13,17 @@ namespace Services
         readonly IKategoriServices _kategori;
         readonly IUsersServices _user;
         readonly IMakaleDataServices _makaleData;
+        readonly IUserRoleServices _userRole;
+        readonly IMakaleCommentServices _makaleComment;
 
-
-
-        public ServiceManager(IUsersServices user, IKategoriServices kategori, IMakaleServices makale, IMakaleDataServices makaleData)
+        public ServiceManager(IUsersServices user, IKategoriServices kategori, IMakaleServices makale, IMakaleDataServices makaleData, IUserRoleServices userRole, IMakaleCommentServices makaleComment)
         {
             _user = user;
             _kategori = kategori;
             _makale = makale;
             _makaleData = makaleData;
+            _userRole = userRole;
+            _makaleComment = makaleComment;
         }
 
         public IKategoriServices KategoriServices => _kategori;
@@ -31,5 +33,8 @@ namespace Services
         public IUsersServices UsersServices => _user;
         
         public IMakaleDataServices MakaleDataServices => _makaleData;
+
+        public IUserRoleServices UserRoleServices => _userRole;
+        public IMakaleCommentServices MakaleCommentServices => _makaleComment;
     }
 }

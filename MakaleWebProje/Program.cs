@@ -1,4 +1,4 @@
-using Entities.Dtos;
+﻿using Entities.Dtos;
 using Microsoft.AspNetCore.Session;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,9 +9,12 @@ using Services.InterfaceClass;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Repositories.RepositoryClass;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Servisleri ekliyoruz
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
@@ -19,55 +22,61 @@ builder.Services.AddDbContext<RepositoryContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
         b => b.MigrationsAssembly("MakaleWebProje"));
-
 });
-builder.Services.AddScoped<IRepositoryManager , RepositoryManager>();
+
+builder.Services.AddScoped<IRepositoryManager, RepositoryManager>();
 builder.Services.AddScoped<IMakaleRepository, MakaleRepository>();
 builder.Services.AddScoped<IKategoriRepository, KategoriRepository>();
 builder.Services.AddScoped<IUsersRepository, UserRepository>();
 builder.Services.AddScoped<IMakaleDataRepository, MakaleDataRepository>();
+builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
+builder.Services.AddScoped<IMakaleCommentRepository, MakaleCommentRepository>();
 
 builder.Services.AddScoped<IServiceManager, ServiceManager>();
 builder.Services.AddScoped<IMakaleServices, MakaleManager>();
 builder.Services.AddScoped<IKategoriServices, KategoriManager>();
 builder.Services.AddScoped<IUsersServices, UserManager>();
 builder.Services.AddScoped<IMakaleDataServices, MakaledataManager>();
-
-builder.Services.AddScoped<MakaleRepository>();
-builder.Services.AddScoped<IMakaleRepository>(provider => provider.GetService<MakaleRepository>());
-builder.Services.AddScoped<IKategoriRepository, KategoriRepository>();
-builder.Services.AddScoped<IUsersRepository, UserRepository>();
-builder.Services.AddScoped<IRepositoryManager, RepositoryManager>();
-builder.Services.AddScoped<IMakaleDataRepository, MakaleDataRepository>();
-
-builder.Services.AddScoped<IRepositoryManager, RepositoryManager>();
-builder.Services.AddScoped<IMakaleRepository, MakaleRepository>();
+builder.Services.AddScoped<IUserRoleServices, UserRoleManager>();
+builder.Services.AddScoped<IMakaleCommentServices, MakaleCommentManager>();
 
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(30); // Oturum s�resi
+    options.IdleTimeout = TimeSpan.FromMinutes(30); // Oturum süresi
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
+builder.Services.AddHttpContextAccessor();
 
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+       
+        options.LoginPath = "/User/Login";
+        options.LogoutPath = "/User/Logout";
+    });
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("Admin", policy => policy.RequireRole("Admin"));
+});
 
+builder.Services.AddAuthorization();
 builder.Services.AddAutoMapper(typeof(Program));
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// HTTP isteği ardışık düzenini yapılandırıyoruz
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
-app.UseSession();
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
+app.UseSession();
 app.UseRouting();
-
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseEndpoints(endpoints =>

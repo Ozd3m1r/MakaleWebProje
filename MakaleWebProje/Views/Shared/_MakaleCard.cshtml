@@ -1,29 +1,101 @@
 ﻿@model Makale
 
-@*
+<div class="col-sm-12 col-md-4 col-lg-3 mb-4">
+    <div class="card makale-card h-100 shadow-sm">
+        <div class="card-img-wrapper">
+            <img src="@Model?.MakaleImagesUrl" class="card-img-top" alt="@Model.MakaleName">
+            <div class="card-img-overlay d-flex align-items-start justify-content-end">
+                <span class="badge bg-primary rounded-pill">
+                 
+                </span>
+            </div>
+        </div>
 
-https://i.kym-cdn.com/photos/images/newsfeed/001/857/763/672.jpg
-*@
-<div class="col-sm-12 col-md-4  my-2">
-    <div class="card" style="width: 10rem;">
-        <img src="@Model?.MakaleImagesUrl" style="width:150px;height:150px;">
-        <div class="card-body">
-            <h5 class="card-title">@Model.MakaleName</h5>
-            <p class="card-text">@Model.MakaleSummary</p>
+        <div class="card-body d-flex flex-column">
+            <h5 class="card-title text-truncate mb-2">@Model.MakaleName</h5>
+            <p class="card-text flex-grow-1">@(Model.MakaleSummary?.Length > 100 ? Model.MakaleSummary.Substring(0, 100) + "..." : Model.MakaleSummary)</p>
 
-            <div class="btn btn-group">
+            <div class="card-actions mt-3">
+                <a href="Makale/get/@Model.MakaleId" class="btn btn-outline-primary btn-sm w-100 mb-2">
+                    <i class="bi bi-book-half"></i> Detayları Gör
+                </a>
                 <form id="@Model.MakaleId" asp-page="/Cart" method="post">
                     <input type="hidden" asp-for="MakaleId" />
                     <input type="hidden" name="returnUrl" value="/Makale/Get/@ViewContext" />
-                    <button type="submit" class=" btn btn-outline-primary">
-
-                        Sepete Ekle
+                    <button type="submit" class="btn btn-primary btn-sm w-100">
+                        <i class="bi bi-bookmark-plus"></i> Kaydet
                     </button>
                 </form>
-                <a href="Makale/get/@Model.MakaleId" class="btn btn-primary">Get Details</a>
             </div>
-
-
         </div>
     </div>
 </div>
+
+<style>
+    .makale-card {
+        transition: all 0.3s ease;
+        border: none;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+        .makale-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 .5rem 1rem rgba(0,0,0,.15) !important;
+        }
+
+    .card-img-wrapper {
+        position: relative;
+        height: 200px;
+        overflow: hidden;
+    }
+
+        .card-img-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+    .makale-card:hover .card-img-wrapper img {
+        transform: scale(1.05);
+    }
+
+    .card-img-overlay {
+        background: linear-gradient(to bottom, rgba(0,0,0,0.4), transparent);
+        transition: all 0.3s ease;
+    }
+
+    .card-title {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .card-text {
+        color: #666;
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+
+    .card-actions {
+        border-top: 1px solid rgba(0,0,0,.1);
+        padding-top: 1rem;
+    }
+
+    .btn {
+        border-radius: 5px;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+    }
+
+        .btn i {
+            margin-right: 5px;
+        }
+
+    .badge {
+        font-weight: 500;
+        padding: 0.5em 1em;
+    }
+</style>

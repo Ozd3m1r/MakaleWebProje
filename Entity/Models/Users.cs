@@ -22,5 +22,12 @@ namespace Entities.Models
         public int UserRoleId { get; set; }
         public UserRole UserRole { get; set; }
 
+        public ICollection<MakaleComment> MakaleComments { get; set; }
+        public Users()
+        {
+            MakaleComments = new HashSet<MakaleComment>();
+        }
+
+
     }
 }

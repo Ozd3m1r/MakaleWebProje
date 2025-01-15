@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using Entities.Dtos;
+using Entities.Dtos.MakaleDtos;
 using Entities.Models;
 using Entity.RequestParameters;
 using Repositories;
@@ -32,6 +32,7 @@ namespace Services
             {
                 MakaleName = makaleDto.MakaleName,
                 MakaleSummary = makaleDto.MakaleSummary,
+                MakaleContent = makaleDto.MakaleContent,
                 MakaleDate = makaleDto.MakaleDate,
                 MakaleIsShow = makaleDto.MakaleIsShow,
                 MakaleImagesUrl = makaleDto.MakaleImagesUrl,
@@ -84,17 +85,46 @@ namespace Services
 
         public MakaleDtoUpdate GetOneMakaleUpdate(int id, bool trackChanges)
         {
+
             var makale = GetOneMakale(id, trackChanges);
             if (makale == null)
                 throw new Exception("Makale Bulunamadı");
 
-            var makaleDto = _mapper.Map<MakaleDtoUpdate>(makale);
+            // Manuel dönüşüm
+            var makaleDto = new MakaleDtoUpdate
+            {
+                Id = makale.MakaleId,
+                MakaleName = makale.MakaleName,
+                MakaleSummary = makale.MakaleSummary,
+                MakaleContent = makale.MakaleContent,
+                MakaleDate = makale.MakaleDate,
+                MakaleIsShow = makale.MakaleIsShow,
+                MakaleImagesUrl = makale.MakaleImagesUrl,
+                KategoriId = makale.KategoriId,
+                MakaleCarousel = makale.MakaleCarousel,
+                MakaleIsShowHome = makale.MakaleIsShowHome,
+                Kategori = makale.Kategori // Eğer kategori bilgisi gerekiyorsa
+            };
+
             return makaleDto;
         }
 
         public void OneUpdateMakale(MakaleDtoUpdate makaleDto)
         {
-            var entity = _mapper.Map<Makale>(makaleDto);
+             var entity = new Makale
+            {
+                MakaleId = makaleDto.Id,
+                MakaleName = makaleDto.MakaleName,
+                MakaleSummary = makaleDto.MakaleSummary,
+                MakaleContent = makaleDto.MakaleContent,
+                MakaleDate = makaleDto.MakaleDate,
+                MakaleIsShow = makaleDto.MakaleIsShow,
+                MakaleImagesUrl = makaleDto.MakaleImagesUrl,
+                KategoriId = makaleDto.KategoriId ?? 1,
+                MakaleCarousel = makaleDto.MakaleCarousel,
+                MakaleIsShowHome = makaleDto.MakaleIsShowHome
+            };
+
             _manager.Makale.OneUpdateMakale(entity);
             _manager.Save();
         }
@@ -105,10 +135,23 @@ namespace Services
             _manager.Makale.Delete(makale);
             _manager.Save();
         }
+        public void UpdateMakale(Makale makale)
+        {
+            _manager.Makale.Update(makale);
+            _manager.Save();
+        }
 
         public IQueryable<Makale> GetMakaleCarousel(bool trackChanges)
         {
             return _manager.Makale.GetMakaleCarousel(trackChanges);
+        }
+        public IQueryable<Makale> GetMakaleIsShowHome(bool trackChanges)
+        {
+            return _manager.Makale.GetMakaleIsShowHome(trackChanges);
+        }
+        public IQueryable<Makale> GetMakaleIsShow(bool trackChanges)
+        {
+            return _manager.Makale.GetMakaleIsShow(trackChanges);
         }
 
         // Asenkron metotların implementasyonu:
@@ -131,6 +174,14 @@ namespace Services
         public async Task<IEnumerable<Makale>> GetMakaleCarouselAsync(bool trackChanges)
         {
             return await _manager.Makale.GetMakaleCarouselAsync(trackChanges);
+        }
+        public async Task<IEnumerable<Makale>> GetMakaleIsShowHomeAsync(bool trackChanges)
+        {
+            return await _manager.Makale.GetMakaleIsShowHomeAsync(trackChanges);
+        }
+        public async Task<IEnumerable<Makale>> GetMakaleIsShowAsync(bool trackChanges)
+        {
+            return await _manager.Makale.GetMakaleIsShowAsync(trackChanges);
         }
     }
 }

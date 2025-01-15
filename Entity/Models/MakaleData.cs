@@ -24,6 +24,9 @@ namespace Entities.Models
         // Beğeni ve Beğenmeme sayıları
         public int MakaleLike { get; set; }
         public int MakaleDislike { get; set; }
+
+        // Yorumlar ile ilişki
+        public ICollection<MakaleComment> Comments { get; set; }
     }
 
 }

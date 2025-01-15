@@ -1,0 +1,194 @@
+@{
+    ViewData["Title"] = "Makaleler";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@model IEnumerable<Makale>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0">Makaleler</h3>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <a href="@Url.Action("Create", "Makale", new { area = "Admin" })" class="btn btn-light">
+                            <i class="bi bi-plus"></i> Yeni Makale
+                        </a>
+                    }
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        @foreach (var makale in Model)
+                        {
+                            <div class="col-md-6 col-lg-4 mb-4">
+                                <div class="card h-100">
+                                    <img src="@makale.MakaleImagesUrl" class="card-img-top" alt="@makale.MakaleName" 
+                                         style="height: 200px; object-fit: cover;">
+                                    <div class="card-body">
+                                        <h5 class="card-title">@makale.MakaleName</h5>
+                                        <p class="card-text text-muted">
+                                            @(makale.MakaleSummary?.Length > 100 
+                                                ? makale.MakaleSummary.Substring(0, 100) + "..." 
+                                                : makale.MakaleSummary)
+                                        </p>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <small class="text-muted">
+                                                <i class="bi bi-calendar3"></i> 
+                                                @makale.CreatedDate?.ToString("dd MMM yyyy")
+                                            </small>
+                                            <a href="@Url.Action("Get", new { id = makale.MakaleId })" 
+                                               class="btn btn-primary btn-sm">
+                                                Devamını Oku
+                                            </a>
+                                        </div>
+                                    </div>
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <div class="card-footer bg-transparent">
+                                            <div class="d-flex flex-wrap gap-2">
+                                                <!-- Yayın Durumu -->
+                                                <button class="btn @(makale.MakaleIsShow ? "btn-success" : "btn-secondary") btn-sm toggle-show" 
+                                                        onclick="toggleShow(this, @makale.MakaleId)">
+                                                    <i class="bi @(makale.MakaleIsShow ? "bi-eye-fill" : "bi-eye-slash-fill")"></i>
+                                                    @(makale.MakaleIsShow ? "Yayında" : "Taslak")
+                                                </button>
+
+                                                <!-- Ana Sayfa Durumu -->
+                                                <button class="btn @(makale.MakaleIsShowHome ? "btn-info" : "btn-secondary") btn-sm toggle-show-home" 
+                                                        onclick="toggleShowHome(this, @makale.MakaleId)">
+                                                    <i class="bi @(makale.MakaleIsShowHome ? "bi-house-fill" : "bi-house")"></i>
+                                                    @(makale.MakaleIsShowHome ? "Ana Sayfada" : "Ana Sayfada Değil")
+                                                </button>
+
+                                                <!-- Carousel Durumu -->
+                                                <button class="btn @(makale.MakaleCarousel ? "btn-warning" : "btn-secondary") btn-sm toggle-carousel" 
+                                                        onclick="toggleCarousel(this, @makale.MakaleId)">
+                                                    <i class="bi @(makale.MakaleCarousel ? "bi-images" : "bi-images")"></i>
+                                                    @(makale.MakaleCarousel ? "Slider'da" : "Slider'da Değil")
+                                                </button>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .card {
+            transition: transform 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+        }
+        .gap-2 {
+            gap: 0.5rem !important;
+        }
+        .toggle-show, .toggle-show-home, .toggle-carousel {
+            transition: all 0.3s ease;
+        }
+        .toggle-show:hover, .toggle-show-home:hover, .toggle-carousel:hover {
+            transform: scale(1.05);
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        function toggleShow(button, id) {
+            $.post('/Admin/Makale/ToggleShowMakale', { id: id }, function(response) {
+                if (response.success) {
+                    if (response.isShow) {
+                        $(button)
+                            .removeClass('btn-secondary')
+                            .addClass('btn-success')
+                            .find('i')
+                            .removeClass('bi-eye-slash-fill')
+                            .addClass('bi-eye-fill');
+                        $(button).contents().filter(function() {
+                            return this.nodeType === 3;
+                        }).replaceWith(' Yayında');
+                    } else {
+                        $(button)
+                            .removeClass('btn-success')
+                            .addClass('btn-secondary')
+                            .find('i')
+                            .removeClass('bi-eye-fill')
+                            .addClass('bi-eye-slash-fill');
+                        $(button).contents().filter(function() {
+                            return this.nodeType === 3;
+                        }).replaceWith(' Taslak');
+                    }
+                }
+            });
+        }
+
+        function toggleShowHome(button, id) {
+            $.post('/Admin/Makale/ToggleShowHome', { id: id }, function(response) {
+                if (response.success) {
+                    if (response.isShowHome) {
+                        $(button)
+                            .removeClass('btn-secondary')
+                            .addClass('btn-info')
+                            .find('i')
+                            .removeClass('bi-house')
+                            .addClass('bi-house-fill');
+                        $(button).contents().filter(function() {
+                            return this.nodeType === 3;
+                        }).replaceWith(' Ana Sayfada');
+                    } else {
+                        $(button)
+                            .removeClass('btn-info')
+                            .addClass('btn-secondary')
+                            .find('i')
+                            .removeClass('bi-house-fill')
+                            .addClass('bi-house');
+                        $(button).contents().filter(function() {
+                            return this.nodeType === 3;
+                        }).replaceWith(' Ana Sayfada Değil');
+                    }
+                }
+            });
+        }
+
+        function toggleCarousel(button, id) {
+            $.post('/Admin/Makale/ToggleShowCarrosel', { id: id }, function(response) {
+                if (response.success) {
+                    if (response.isShowCarousel) {
+                        $(button)
+                            .removeClass('btn-secondary')
+                            .addClass('btn-warning')
+                            .find('i')
+                            .removeClass('bi-images')
+                            .addClass('bi-images');
+                        $(button).contents().filter(function() {
+                            return this.nodeType === 3;
+                        }).replaceWith(' Slider\'da');
+                    } else {
+                        $(button)
+                            .removeClass('btn-warning')
+                            .addClass('btn-secondary')
+                            .find('i')
+                            .removeClass('bi-images')
+                            .addClass('bi-images');
+                        $(button).contents().filter(function() {
+                            return this.nodeType === 3;
+                        }).replaceWith(' Slider\'da Değil');
+                    }
+                }
+            });
+        }
+    </script>
+} 

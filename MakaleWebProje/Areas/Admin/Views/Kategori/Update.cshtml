@@ -1,0 +1,19 @@
+﻿@model Entities.Models.Kategori
+@{
+    ViewData["Title"] = "Kategori Düzenle";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">Kategori Düzenle</h2>
+
+    <form asp-action="Edit" method="post">
+        <div class="mb-3">
+            <label asp-for="KategoriName" class="form-label">Kategori Adı</label>
+            <input asp-for="KategoriName" class="form-control" />
+            <span asp-validation-for="KategoriName" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Güncelle</button>
+        <a href="@Url.Action("Index")" class="btn btn-secondary">İptal</a>
+    </form>
+</div>

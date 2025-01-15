@@ -1,4 +1,4 @@
-﻿using Entities.Dtos;
+﻿using Entities.Dtos.MakaleDtos;
 using Entities.Models;
 using Entity.RequestParameters;
 using System;
@@ -15,9 +15,8 @@ namespace Services.InterfaceClass
         IEnumerable<Makale> GetAllMakaleDetails(MakaleRequestParameters m);
         Makale? GetOneMakale(int id, bool trackChanges);
         IQueryable<Makale> GetMakaleCarousel(bool trackChanges);
-        void CreateMakale(MakaleDtoInsertion makaleDto);
-        void OneUpdateMakale(MakaleDtoUpdate makaleDto);
-        void Deletemakale(int id);
+        IQueryable<Makale> GetMakaleIsShowHome(bool trackChanges);
+        IQueryable<Makale> GetMakaleIsShow(bool trackChanges);
         MakaleDtoUpdate GetOneMakaleUpdate(int id, bool trackChanges);
 
         // Asenkron metotlar
@@ -25,6 +24,12 @@ namespace Services.InterfaceClass
         Task<IEnumerable<Makale>> GetAllMakaleDetailsAsync(MakaleRequestParameters m);
         Task<Makale?> GetOneMakaleAsync(int id, bool trackChanges);
         Task<IEnumerable<Makale>> GetMakaleCarouselAsync(bool trackChanges);
-      
+        Task<IEnumerable<Makale>> GetMakaleIsShowHomeAsync(bool trackChanges);
+        Task<IEnumerable<Makale>> GetMakaleIsShowAsync(bool trackChanges);
+
+        void CreateMakale(MakaleDtoInsertion makaleDto);
+        void OneUpdateMakale(MakaleDtoUpdate makaleDto);
+        void Deletemakale(int id);
+        void UpdateMakale(Makale makale);
     }
 }

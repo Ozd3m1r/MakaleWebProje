@@ -26,5 +26,6 @@ namespace Repositories.InterfaceClass
         // Kullanıcıya ait tüm beğenileri/getir
         Task<IEnumerable<MakaleData>> GetMakaleDataByUserId(int userId);
 
+
     }
 }

@@ -1,14 +1,16 @@
-﻿using Entities.Dtos;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Services.InterfaceClass;
 using MakaleWebProje.Areas.Admin.Model;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using Entities.Models;
+using Entities.Dtos.MakaleDtos;
+using Microsoft.AspNetCore.Authorization;
 namespace MakaleWebProje.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = "Admin")]
     public class MakaleController : Controller
     {
         private readonly IServiceManager _manager;
@@ -52,11 +54,31 @@ namespace MakaleWebProje.Areas.Admin.Controllers
             return View(new MakaleDtoInsertion());
         }
 
+
         [HttpPost]
         public async Task<IActionResult> Create(MakaleDtoInsertion makaleDto, IFormFile file)
         {
             try
             {
+                // Debug için form verilerini yazdır
+                System.Diagnostics.Debug.WriteLine($"MakaleName: {makaleDto.MakaleName}");
+                System.Diagnostics.Debug.WriteLine($"MakaleSummary: {makaleDto.MakaleSummary}");
+                System.Diagnostics.Debug.WriteLine($"KategoriId: {makaleDto.KategoriId}");
+                System.Diagnostics.Debug.WriteLine($"MakaleDate: {makaleDto.MakaleDate}");
+                System.Diagnostics.Debug.WriteLine($"File: {(file != null ? file.FileName : "null")}");
+
+                // Form verilerinin null kontrolü
+                if (makaleDto == null)
+                {
+                    ModelState.AddModelError("", "Form verileri boş geldi!");
+                    ViewBag.Categories = _manager.KategoriServices.GetAllKategori(false)?.ToList();
+                    return View(new MakaleDtoInsertion());
+                }
+
+                // Tarih kontrolü
+                makaleDto.MakaleDate ??= DateTime.Now.ToString("yyyy-MM-dd");
+
+                // Dosya işleme
                 if (file != null && file.Length > 0)
                 {
                     string uploads = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images");
@@ -73,16 +95,27 @@ namespace MakaleWebProje.Areas.Admin.Controllers
 
                     makaleDto.MakaleImagesUrl = $"/images/{file.FileName}";
                 }
-
-                // Eğer tarih boşsa bugünün tarihini ata
-                makaleDto.MakaleDate ??= DateTime.Now.ToString("yyyy-MM-dd");
-
-                if (!ModelState.IsValid)
+                else
                 {
-                    ViewBag.Categories = _manager.KategoriServices.GetAllKategori(false)?.ToList();
-                    return View(makaleDto);
+                    // Eğer dosya yüklenmediyse varsayılan bir resim atayabilirsiniz
+                    makaleDto.MakaleImagesUrl = "/images/default.jpg"; // veya null bırakın
                 }
 
+                // Validation kontrolü
+                if (!ModelState.IsValid)
+                {
+                    foreach (var modelState in ModelState)
+                    {
+                        foreach (var error in modelState.Value.Errors)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Key: {modelState.Key}, Error: {error.ErrorMessage}");
+                        }
+                    }
+
+                    ViewBag.Categories = _manager.KategoriServices.GetAllKategori(false)?.ToList();
+                }
+
+                // Makaleyi kaydet
                 _manager.MakaleServices.CreateMakale(makaleDto);
                 TempData["SuccessMessage"] = "Makale başarıyla eklendi.";
                 return RedirectToAction("Index", "Makale");
@@ -95,144 +128,123 @@ namespace MakaleWebProje.Areas.Admin.Controllers
             }
         }
 
-        /* private SelectList KategoriSelectList()
-         {
-             return new SelectList(
-                  _manager.KategoriServices.GetAllKategori(false),
-                  "KategoriId",
-                  "KategoriName",
-                  "1");
-         }*/
-        /* [HttpGet]
-         public IActionResult Create()
-         {
-             var categoriesQuery = _manager.KategoriServices.GetAllKategori(false); // IQueryable türü
-             if (!categoriesQuery.Any())
-             {
-                 // Kategoriler boşsa hata mesajı göster
-                 ViewBag.Categories = new List<Kategori>();
-             }
-             else
-             {
-                 ViewBag.Categories = categoriesQuery.ToList();
-             }
 
-             return View();
-         }
 
-         //[HttpPost]
+        [HttpGet]
+        public IActionResult Update([FromRoute(Name = "id")] int id)
+        {
+            var categories = _manager.KategoriServices.GetAllKategori(false)?.ToList();
+            ViewBag.Categories = categories ?? new List<Kategori>();
 
-         /*  public async Task<IActionResult> Create([FromForm] MakaleDtoInsertion MakaleDto, IFormFile file)
-           {
-               // Dosya yükleme işlemi
-               if (file != null && file.Length > 0)
-               {
-                   string uploads = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images");
-                   if (!Directory.Exists(uploads))
-                   {
-                       Directory.CreateDirectory(uploads);
-                   }
-                   string filePath = Path.Combine(uploads, file.FileName);
+            var model = _manager.MakaleServices.GetOneMakaleUpdate(id, false);
+            return View(model);
+        }
+        [HttpPost]
+        public async Task<IActionResult> Update([FromForm] MakaleDtoUpdate MakaleDto, IFormFile? file)
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    // Eğer yeni bir dosya yüklendiyse
+                    if (file != null && file.Length > 0)
+                    {
+                        string path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", file.FileName);
+                        using (var stream = new FileStream(path, FileMode.Create))
+                        {
+                            await file.CopyToAsync(stream);
+                        }
+                        MakaleDto.MakaleImagesUrl = String.Concat("/images/", file.FileName);
+                    }
+                    else
+                    {
+                        // Dosya yüklenmediyse mevcut görseli koru
+                        var existingMakale = _manager.MakaleServices.GetOneMakale(MakaleDto.Id, false);
+                        if (existingMakale != null)
+                        {
+                            MakaleDto.MakaleImagesUrl = existingMakale.MakaleImagesUrl;
+                        }
+                    }
 
-                   using (var stream = new FileStream(filePath, FileMode.Create))
-                   {
-                       await file.CopyToAsync(stream);
-                   }
+                    // Makaleyi güncelle
+                    _manager.MakaleServices.OneUpdateMakale(MakaleDto);
+                    TempData["Message"] = "Makale başarıyla güncellendi.";
+                    return RedirectToAction("Index");
+                }
 
-                   MakaleDto.MakaleImagesUrl = $"/images/{file.FileName}";
-               }
+                // ModelState geçerli değilse
+                var categories = _manager.KategoriServices.GetAllKategori(false)?.ToList();
+                ViewBag.Categories = categories ?? new List<Kategori>();
+                return View(MakaleDto);
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", $"Güncelleme sırasında bir hata oluştu: {ex.Message}");
+                var categories = _manager.KategoriServices.GetAllKategori(false)?.ToList();
+                ViewBag.Categories = categories ?? new List<Kategori>();
+                return View(MakaleDto);
+            }
+        }
+        [HttpPost]
+        public IActionResult ToggleShowHome(int id)
+        {
+            try
+            {
+                var makale = _manager.MakaleServices.GetOneMakale(id, true);
+                if (makale != null)
+                {
+                    makale.MakaleIsShowHome = !makale.MakaleIsShowHome;
+                    _manager.MakaleServices.UpdateMakale(makale); // GetOneMakaleUpdate yerine UpdateMakale kullanıyoruz
+                    return Json(new { success = true, isShowHome = makale.MakaleIsShowHome });
+                }
+                return Json(new { success = false, message = "Makale bulunamadı." });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
 
-               // Tarih bilgisini otomatik olarak güncelle
-               MakaleDto.MakaleDate = DateTime.Now.ToString("yyyy-MM-dd"); // Bugünün tarihini atıyoruz
+        [HttpPost]
+        public IActionResult ToggleShowCarrosel(int id)
+        {
+            try
+            {
+                var makale = _manager.MakaleServices.GetOneMakale(id, true);
+                if (makale != null)
+                {
+                    makale.MakaleCarousel = !makale.MakaleCarousel;
+                    _manager.MakaleServices.UpdateMakale(makale);
+                    return Json(new { success = true, isShowCarousel = makale.MakaleCarousel });
+                }
+                return Json(new { success = false, message = "Makale bulunamadı." });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
 
-               // Model doğrulama
-               if (ModelState.IsValid)
-               {
-                   _manager.MakaleServices.CreateMakale(MakaleDto); // Makale oluşturuluyor
-                   return RedirectToAction("Index");
-               }
-
-               // Eğer model geçerli değilse, kategori listesi ile formu tekrar göster
-               ViewBag.Kategories = KategoriSelectList();
-
-               // ModelState hatalarını loglayın
-               foreach (var modelError in ModelState.Values.SelectMany(v => v.Errors))
-               {
-                   Console.WriteLine($"Model Error: {modelError.ErrorMessage}");
-               }
-
-               return View(MakaleDto);
-           }*/
-        /*  [HttpPost]
-          public async Task<IActionResult> Create(MakaleDtoInsertion makaleDto, IFormFile file)
-          {
-              if (file != null && file.Length > 0)
-              {
-                  string uploads = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images");
-                  if (!Directory.Exists(uploads))
-                  {
-                      Directory.CreateDirectory(uploads);
-                  }
-                  string filePath = Path.Combine(uploads, file.FileName);
-
-                  using (var stream = new FileStream(filePath, FileMode.Create))
-                  {
-                      await file.CopyToAsync(stream);
-                  }
-
-                  makaleDto.MakaleImagesUrl = $"/images/{file.FileName}";
-              }
-
-              else
-              {
-                  Console.WriteLine("yüklenmedi");
-              }
-              if (string.IsNullOrEmpty(makaleDto.MakaleDate))
-              {
-                  makaleDto.MakaleDate = DateTime.Now.ToString("yyyy-MM-dd");
-              }
-
-              if (ModelState.IsValid)
-              {
-                  ViewBag.Categories = KategoriSelectList();
-                  return View(makaleDto);
-              }
-              _manager.MakaleServices.CreateMakale(makaleDto);
-              return RedirectToAction("Index");
-          }*/
-
+        [HttpPost]
+        public IActionResult ToggleShowMakale(int id)
+        {
+            try
+            {
+                var makale = _manager.MakaleServices.GetOneMakale(id, true);
+                if (makale != null)
+                {
+                    makale.MakaleIsShow = !makale.MakaleIsShow;
+                    _manager.MakaleServices.UpdateMakale(makale);
+                    return Json(new { success = true, isShow = makale.MakaleIsShow });
+                }
+                return Json(new { success = false, message = "Makale bulunamadı." });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
 
     }
-        //[HttpGet]
-        //public IActionResult Update([FromRoute(Name = "id")] int id)
-        //{
-        //    ViewBag.Categories = KategoriSelectList();
-        //    var model = _manager.MakaleServices.GetOneMakaleUpdate(id,false);
-        //    return View(model);
-        //}
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> Update([FromForm] MakaleDtoUpdate MakaleDto, IFormFile file)
-        //{
-
-
-        //    // Model doğrulama
-        //    if (ModelState.IsValid)
-        //    {
-        //        string path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", file.FileName);
-        //        using (var stream = new FileStream(path, FileMode.Create)) { await file.CopyToAsync(stream); }
-        //        MakaleDto.MakaleImagesUrl = String.Concat("/images/", file.FileName);
-        //        _manager.MakaleServices.OneUpdateMakale(MakaleDto);
-        //        return RedirectToAction("Index");
-        //    }
-        //    return View();
-        //}
-        //[HttpGet]
-        //public IActionResult Delete([FromRoute(Name = "id")] int id)
-        //{
-        //    _manager.MakaleDataServices.DeleteMakaleDataByMakaleId(id);
-        //    _manager.MakaleServices.Deletemakale(id);
-        //    return RedirectToAction("Index");
-        //}
-    }
+}
 

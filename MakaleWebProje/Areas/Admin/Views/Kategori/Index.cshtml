@@ -1,0 +1,41 @@
+﻿@model IEnumerable<Entities.Models.Kategori>
+@{
+    ViewData["Title"] = "Kategori Yönetimi";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">Kategori Listesi</h2>
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["Message"]
+        </div>
+    }
+
+    <a href="@Url.Action("Create")" class="btn btn-primary mb-3">Yeni Kategori Ekle</a>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Kategori Adı</th>
+                <th>Aksiyonlar</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var kategori in Model)
+            {
+                <tr>
+                    <td>@kategori.KategoriId</td>
+                    <td>@kategori.KategoriName</td>
+                    <td>
+                        <a href="@Url.Action("Update", new { id = kategori.KategoriId })" class="btn btn-warning">Düzenle</a>
+                        <form action="@Url.Action("Delete", new { id = kategori.KategoriId })" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('Emin misiniz?');">Sil</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

@@ -1,15 +1,23 @@
 ﻿using Entities.Models;
-using Repositories.InterfaceClass;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Services.InterfaceClass
 {
     public interface IKategoriServices
     {
+        // Tüm kategorileri getir
         IEnumerable<Kategori> GetAllKategori(bool trackChanges);
+
+        // Bir kategori getir
+        Kategori GetKategoriById(int kategoriId, bool trackChanges);
+
+        // Kategori oluştur
+        void CreateKategori(Kategori kategori);
+
+        // Kategori sil
+        void DeleteKategori(Kategori kategori);
+
+        // Kategori güncelle
+        void UpdateKategori(Kategori kategori);
     }
 }

@@ -1,0 +1,149 @@
+@model IEnumerable<Entities.Models.Makale>
+@{
+    var makaleLikesDislikes = ViewBag.MakaleLikesDislikes as Dictionary<int, (int LikesCount, int DislikesCount)>;
+}
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h3 class="mb-0">Makaleler</h3>
+            <a href="@Url.Action("Create")" class="btn btn-light">
+                <i class="bi bi-plus-circle"></i> Yeni Makale
+            </a>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Görsel</th>
+                            <th>Başlık</th>
+                            <th>Beğeni</th>
+                            <th>Beğenmeme</th>
+                            <th>Durum</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var makale in Model)
+                        {
+                            var likesDislikes = makaleLikesDislikes.ContainsKey(makale.MakaleId) ? makaleLikesDislikes[makale.MakaleId] : (0, 0);
+                            <tr>
+                                <td>@makale.MakaleId</td>
+                                <td>
+                                    <img src="@makale.MakaleImagesUrl" alt="@makale.MakaleName" 
+                                         class="img-thumbnail" style="width: 100px; height: auto;">
+                                </td>
+                                <td>@makale.MakaleName</td>
+                                <td>@likesDislikes.Item1</td>
+                                <td>@likesDislikes.Item2</td>
+                                <td>
+                                    <div class="d-flex gap-2">
+                                        <!-- Yayın Durumu -->
+                                        <button class="btn @(makale.MakaleIsShow ? "btn-success" : "btn-secondary") btn-sm" 
+                                                onclick="toggleShow(@makale.MakaleId)">
+                                            <i class="bi @(makale.MakaleIsShow ? "bi-eye-fill" : "bi-eye-slash-fill")"></i>
+                                            @(makale.MakaleIsShow ? "Yayında" : "Taslak")
+                                        </button>
+
+                                        <!-- Ana Sayfa Durumu -->
+                                        <button class="btn @(makale.MakaleIsShowHome ? "btn-info" : "btn-secondary") btn-sm" 
+                                                onclick="toggleShowHome(@makale.MakaleId)">
+                                            <i class="bi @(makale.MakaleIsShowHome ? "bi-house-fill" : "bi-house")"></i>
+                                            @(makale.MakaleIsShowHome ? "Ana Sayfada" : "Ana Sayfada Değil")
+                                        </button>
+
+                                        <!-- Slider Durumu -->
+                                        <button class="btn @(makale.MakaleCarousel ? "btn-warning" : "btn-secondary") btn-sm" 
+                                                onclick="toggleCarousel(@makale.MakaleId)">
+                                            <i class="bi @(makale.MakaleCarousel ? "bi-images" : "bi-images")"></i>
+                                            @(makale.MakaleCarousel ? "Slider'da" : "Slider'da Değil")
+                                        </button>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a href="@Url.Action("Update", new { id = makale.MakaleId })" 
+                                           class="btn btn-warning btn-sm">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <button onclick="confirmDelete(@makale.MakaleId)" 
+                                                class="btn btn-danger btn-sm">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                        <a href="@Url.Action("Get", "Makale", new { id = makale.MakaleId, area = "" })" 
+                                           target="_blank" class="btn btn-primary btn-sm">
+                                            <i class="bi bi-box-arrow-up-right"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function confirmDelete(id) {
+            if (confirm('Bu makaleyi silmek istediğinize emin misiniz?')) {
+                window.location.href = '@Url.Action("Delete")?id=' + id;
+            }
+        }
+
+        function toggleShow(id) {
+            $.post('@Url.Action("ToggleShowMakale")', { id: id }, function(response) {
+                if (response.success) {
+                    location.reload();
+                }
+            });
+        }
+
+        function toggleShowHome(id) {
+            $.post('@Url.Action("ToggleShowHome")', { id: id }, function(response) {
+                if (response.success) {
+                    location.reload();
+                }
+            });
+        }
+
+        function toggleCarousel(id) {
+            $.post('@Url.Action("ToggleShowCarrosel")', { id: id }, function(response) {
+                if (response.success) {
+                    location.reload();
+                }
+            });
+        }
+    </script>
+}
+
+@section Styles {
+    <style>
+        .table img {
+            object-fit: cover;
+            border-radius: 4px;
+        }
+        
+        .btn-group .btn {
+            padding: 0.25rem 0.5rem;
+        }
+
+        .gap-2 {
+            gap: 0.5rem !important;
+        }
+
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .table > :not(caption) > * > * {
+            padding: 1rem 0.5rem;
+            vertical-align: middle;
+        }
+    </style>
+} 

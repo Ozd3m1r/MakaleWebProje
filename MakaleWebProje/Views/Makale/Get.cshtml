@@ -5,37 +5,349 @@
     var isUserLoggedIn = ViewBag.IsUserLoggedIn ?? false;
 }
 
-<div class="row">
-    <div class="cold-md-12">
-        <div class="text-center">
-            <h6 class="display-6">
-                <h3>@Model.MakaleName</h3>
-            </h6>
-            <img class="img-fluid shadow rounded-3" src="@Model.MakaleImagesUrl" alt="@Model.MakaleName" width="500" />
-            <p>@Model?.MakaleSummary</p>
+<div class="article-container">
+    <!-- Başlık ve Meta Bilgiler -->
+    <div class="article-header">
+        <h1 class="article-title">@Model.MakaleName</h1>
+        <div class="article-meta">
+            <span class="date"><i class="bi bi-calendar3"></i> @Model.MakaleDate?.ToString()</span>
+            <span class="category"><i class="bi bi-folder2"></i> @Model.Kategori?.KategoriName</span>
+            <span class="stats">
+                @* <i class="bi bi-eye"></i> @Model.ViewCount görüntülenme *@
+            </span>
         </div>
+    </div>
+
+    <!-- Makale Görseli -->
+    <div class="article-image-container">
+        <img class="article-image" src="@Model.MakaleImagesUrl" alt="@Model.MakaleName" />
+    </div>
+
+    <!-- Makale Özeti -->
+    <div class="article-summary">
+        <p class="lead">@Model?.MakaleSummary</p>
+    </div>
+
+    <!-- İçerik -->
+    <div class="article-content">
+        @Html.Raw(Model?.MakaleContent)
+    </div>
+
+    <!-- Etkileşim Bölümü -->
+    <div class="article-interactions">
+        @if (isUserLoggedIn)
+        {
+            <div class="interaction-buttons">
+                <form action="@Url.Action("OnPostLike", "Makale", new { MakaleId = Model.MakaleId, returnUrl = ViewContext.HttpContext.Request.Path })"
+                      method="post" class="d-inline">
+                    <button type="submit" class="btn btn-interaction like-btn">
+                        <i class="bi bi-hand-thumbs-up"></i>
+                        <span class="count">@likesCount</span>
+                    </button>
+                </form>
+
+                <form action="@Url.Action("OnPostDislike", "Makale", new { MakaleId = Model.MakaleId, returnUrl = ViewContext.HttpContext.Request.Path })"
+                      method="post" class="d-inline">
+                    <button type="submit" class="btn btn-interaction dislike-btn">
+                        <i class="bi bi-hand-thumbs-down"></i>
+                        <span class="count">@dislikesCount</span>
+                    </button>
+                </form>
+            </div>
+        }
+        else
+        {
+            <div class="login-prompt">
+                <p>
+                    <i class="bi bi-info-circle"></i>
+                    Makaleleri beğenmek için <a href="/User/Login" class="login-link">giriş yapın</a>
+                </p>
+            </div>
+        }
+    </div>
+
+
+    <!-- Yorumlar Bölümü -->
+
+    <div class="comments-section">
+
+        <h3>Yorumlar</h3>
+
+
+
+        @if (isUserLoggedIn)
+
+        {
+
+            <div class="comment-form">
+
+                <form action="@Url.Action("AddComment", "Makale")" method="post">
+
+                    <input type="hidden" name="makaleId" value="@Model.MakaleId" />
+
+                    <div class="form-group">
+
+                        <textarea name="comment" class="form-control" rows="3"
+                                  placeholder="Yorumunuzu yazın..." required></textarea>
+
+                    </div>
+
+                    <button type="submit" class="btn btn-primary mt-2">
+
+                        <i class="bi bi-chat-dots"></i> Yorum Yap
+
+                    </button>
+
+                </form>
+
+            </div>
+
+        }
+
+        else
+
+        {
+
+            <div class="alert alert-info">
+
+                <i class="bi bi-info-circle"></i>
+
+                Yorum yapmak için <a href="/User/Login">giriş yapın</a>
+
+            </div>
+
+        }
+
+
+
+        <div class="comments-list mt-4">
+            @{
+                var comments = ViewBag.Comments as List<MakaleComment>;
+            }
+            @if (comments != null && comments.Count>1)
+
+            {
+
+                foreach (var comment in ViewBag.Comments)
+
+                {
+
+                    <div class="comment-item">
+
+                        <div class="comment-header">
+
+                            <span class="user-name">@comment.Users.UserName</span>
+
+                            <span class="comment-date">@comment.CreatedDate.ToString("dd MMM yyyy HH:mm")</span>
+
+                        </div>
+
+                        <div class="comment-content">
+
+                            @comment.Comment
+
+                        </div>
+
+                        @if (HttpContextAccessor.HttpContext.Session.GetInt32("UserId") == comment.UserId)
+
+                        {
+
+                            <form action="@Url.Action("DeleteComment", "Makale")" method="post" class="delete-comment">
+
+                                <input type="hidden" name="commentId" value="@comment.MakaleCommentId" />
+
+                                <input type="hidden" name="makaleId" value="@Model.MakaleId" />
+
+                                <button type="submit" class="btn btn-sm btn-danger">
+
+                                    <i class="bi bi-trash"></i>
+
+                                </button>
+
+                            </form>
+
+                        }
+
+                    </div>
+
+                }
+
+            }
+
+            else
+
+            {
+
+                <p class="text-muted">Henüz yorum yapılmamış. İlk yorumu siz yapın!</p>
+
+            }
+
+        </div>
+
+    </div>
+    <!-- Navigasyon Butonları -->
+    <div class="article-navigation">
+        <a class="btn btn-outline-primary" href="@Url.Action("Index", "Makale")">
+            <i class="bi bi-arrow-left"></i> Makalelere Dön
+        </a>
+        <a class="btn btn-outline-secondary" href="@Url.Action("Index", "Home")">
+            <i class="bi bi-house"></i> Ana Sayfa
+        </a>
     </div>
 </div>
 
-<p></p>
-
-<div class="btn-group">
-    <a class="btn btn-primary" asp-controller="Makale" asp-action="Index">Back to list</a>
-    <a class="btn btn-outline-primary" asp-controller="Home" asp-action="Index">Home</a>
-
-    @if (isUserLoggedIn)
-    {
-        <!-- Beğeni ve Beğenmeme Butonları -->
-        <form action="@Url.Action("OnPostLike", "Makale", new { MakaleId = Model.MakaleId, returnUrl = ViewContext.HttpContext.Request.Path })" method="post">
-            <button type="submit" class="btn btn-success">Beğen (Likes: @likesCount)</button>
-        </form>
-
-        <form action="@Url.Action("OnPostDislike", "Makale", new { MakaleId = Model.MakaleId, returnUrl = ViewContext.HttpContext.Request.Path })" method="post">
-            <button type="submit" class="btn btn-danger">Beğenme (Dislikes: @dislikesCount)</button>
-        </form>
+<style>
+    .article-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 0 1rem;
     }
-    else
-    {
-        <p>Giriş yapmadınız, beğenme işlemi yapamazsınız. <a href="/User/Login">Giriş yap</a></p>
+
+    .article-header {
+        text-align: center;
+        margin-bottom: 2rem;
     }
-</div>
+
+    .article-title {
+        font-size: 2.5rem;
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+    }
+
+    .article-meta {
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    .article-meta span {
+        margin: 0 10px;
+    }
+
+    .article-meta i {
+        margin-right: 5px;
+    }
+
+    .article-image-container {
+        position: relative;
+        width: 100%;
+        margin: 2rem 0;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .article-image {
+        width: 100%;
+        height: auto;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    .article-image:hover {
+        transform: scale(1.02);
+    }
+
+    .article-summary {
+        font-size: 1.2rem;
+        line-height: 1.8;
+        color: #444;
+        margin: 2rem 0;
+        padding: 1.5rem;
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        border-left: 4px solid var(--primary-color);
+    }
+
+    .article-content {
+        line-height: 1.8;
+        color: #333;
+        margin: 2rem 0;
+    }
+
+    .article-interactions {
+        text-align: center;
+        margin: 2rem 0;
+        padding: 1rem;
+        background-color: #f8f9fa;
+        border-radius: 10px;
+    }
+
+    .interaction-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+    }
+
+    .btn-interaction {
+        padding: 0.5rem 1.5rem;
+        border-radius: 20px;
+        transition: all 0.3s ease;
+    }
+
+    .like-btn {
+        background-color: #28a745;
+        color: white;
+    }
+
+    .dislike-btn {
+        background-color: #dc3545;
+        color: white;
+    }
+
+    .btn-interaction:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .btn-interaction i {
+        margin-right: 5px;
+    }
+
+    .login-prompt {
+        padding: 1rem;
+        background-color: #e9ecef;
+        border-radius: 10px;
+    }
+
+    .login-link {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: bold;
+    }
+
+    .login-link:hover {
+        text-decoration: underline;
+    }
+
+    .article-navigation {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .article-navigation .btn {
+        padding: 0.5rem 1.5rem;
+        border-radius: 20px;
+    }
+
+    .article-navigation i {
+        margin-right: 5px;
+    }
+
+    @@media (max-width: 768px) {
+        .article-title {
+            font-size: 2rem;
+        }
+
+        .article-meta {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .interaction-buttons {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+    }
+</style>

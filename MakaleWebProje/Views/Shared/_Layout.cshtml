@@ -1,61 +1,249 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - MakaleWebProje</title>
+
+    <!-- CSS Bağlantıları -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/MakaleWebProje.styles.css" asp-append-version="true" />
+
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #3498db;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: #f8f9fa;
+        }
+
+        .navbar {
+            background-color: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color) !important;
+        }
+
+        .nav-link {
+            color: var(--secondary-color) !important;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+            .nav-link:hover {
+                color: var(--accent-color) !important;
+            }
+
+        .btn-custom {
+            border-radius: 20px;
+            padding: 8px 20px;
+            transition: all 0.3s ease;
+        }
+
+        .footer {
+            background-color: var(--primary-color);
+            color: white;
+            font-size: 0.8rem;
+        }
+
+            .footer a {
+                text-decoration: none;
+                opacity: 0.8;
+                transition: opacity 0.3s;
+            }
+
+                .footer a:hover {
+                    opacity: 1;
+                }
+
+            .footer hr {
+                margin: 0.5rem 0;
+            }
+
+        .search-form {
+            position: relative;
+        }
+
+            .search-form input {
+                border-radius: 20px;
+                padding-right: 40px;
+            }
+
+            .search-form button {
+                position: absolute;
+                right: 5px;
+                top: 50%;
+                transform: translateY(-50%);
+                border: none;
+                background: none;
+                color: var(--secondary-color);
+            }
+
+        .nav-search-container {
+            min-width: 250px;
+            max-width: 300px;
+        }
+
+        .nav-search-form .input-group {
+            background-color: #f8f9fa;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .nav-search-form .form-control {
+            border-radius: 20px 0 0 20px;
+            border: 1px solid rgba(0,0,0,.1);
+            background-color: transparent;
+            font-size: 0.9rem;
+        }
+
+        .nav-search-form .btn {
+            border-radius: 0 20px 20px 0;
+            border: 1px solid rgba(0,0,0,.1);
+            background-color: transparent;
+        }
+
+        .nav-search-form .form-control:focus {
+            box-shadow: none;
+            border-color: var(--primary-color);
+        }
+
+            .nav-search-form .form-control:focus + .btn {
+                border-color: var(--primary-color);
+            }
+
+        .nav-search-form .btn:hover {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">MakaleWebProje</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+    <nav class="navbar navbar-expand-lg sticky-top">
+        <div class="container">
+            <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                <i class="bi bi-book"></i> MakaleWebProje
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Home" asp-action="Index">
+                            <i class="bi bi-house"></i> Ana Sayfa
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Makale" asp-action="Index">
+                            <i class="bi bi-file-text"></i> Makaleler
+                        </a>
+                    </li>
+                    @if (User.IsInRole("Admin"))
+                    {
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link" asp-area="Admin" asp-controller="AdminHome" asp-action="Index">
+                                <i class="bi bi-gear"></i> Admin Panel
+                            </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="Admin" asp-controller="adminhome" asp-action="index">admin</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="user" asp-action="login">login</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="profile" asp-action="profiledetails">detaylar</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="user" asp-action="register">kayıt</a>
-                        </li>
-                    </ul>
+                    }
+                </ul>
+
+                <div class="nav-search-container me-3">
+                    <form method="get" class="nav-search-form">
+                        <input type="hidden" name="categoryId" value="@(Context.Request.Query["KategoriId"])" />
+                        <div class="input-group">
+                            <input type="text"
+                                   class="form-control form-control-sm border-end-0"
+                                   name="SearchTerm"
+                                   placeholder="Makale ara..."
+                                   value="@Context.Request.Query["SearchTerm"]" />
+                            <button asp-action="Index" asp-controller="Makale"type="submit" class="btn btn-outline-secondary btn-sm border-start-0">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                    </form>
                 </div>
+                @using Microsoft.AspNetCore.Http 
+                @inject IHttpContextAccessor HttpContextAccessor
+                @if (HttpContextAccessor.HttpContext.Session.GetInt32("UserId") != null)
+                {
+                    <div class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-circle fs-4"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li>
+                                <a class="dropdown-item" asp-controller="Profile" asp-action="ProfileDetails">
+                                    <i class="bi bi-person-badge"></i> Profilim
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form asp-controller="Profile" asp-action="Logout" method="post">
+                                    <button type="submit" class="dropdown-item text-danger">
+                                        <i class="bi bi-box-arrow-right"></i> Çıkış Yap
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                }
+                else
+                {
+                    <div class="d-flex">
+                        <a class="btn btn-custom btn-outline-success me-2" asp-controller="User" asp-action="Register">
+                            <i class="bi bi-person-plus"></i> Kayıt Ol
+                        </a>
+                        <a class="btn btn-custom btn-outline-primary" asp-controller="User" asp-action="Login">
+                            <i class="bi bi-box-arrow-in-right"></i> Giriş
+                        </a>
+                    </div>
+                }
             </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
+        </div>
+    </nav>
+
+    <div class="container my-4">
+        <main role="main">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
+    <footer class="footer py-2">
         <div class="container">
-            &copy; 2024 - MakaleWebProje - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-book me-2"></i>
+                    <small>MakaleWebProje</small>
+                </div>
+                <div class="d-flex gap-3">
+                    <small><a class="text-white" asp-controller="Home" asp-action="About">Hakkımızda</a></small>
+                    <small><a class="text-white" asp-controller="Home" asp-action="Privacy">Gizlilik</a></small>
+                    <small>&copy; @DateTime.Now.Year</small>
+                </div>
+            </div>
         </div>
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
-</html>
+</html> 

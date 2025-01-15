@@ -1,0 +1,35 @@
+﻿@model IEnumerable<Entities.Models.UserRole>
+
+@{
+    ViewData["Title"] = "Rol Listesi";
+}
+
+<h2>Rol Listesi</h2>
+
+<a asp-action="Create" class="btn btn-success mb-3">Yeni Rol Ekle</a>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Rol Adı</th>
+            <th>İşlemler</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var role in Model)
+        {
+            <tr>
+                <td>@role.UserRoleId</td>
+                <td>@role.UserRoleName</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@role.UserRoleId" class="btn btn-primary btn-sm">Düzenle</a>
+                    <form asp-action="Delete" method="post" style="display:inline;">
+                        <input type="hidden" name="id" value="@role.UserRoleId" />
+                        <button type="submit" class="btn btn-danger btn-sm">Sil</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -13,6 +13,8 @@ namespace Repositories.InterfaceClass
         IKategoriRepository Kategori { get; }
         IUsersRepository Users { get; }
         IMakaleDataRepository MakaleData { get; }
+        IUserRoleRepository UserRole { get; }
+        IMakaleCommentRepository MakaleComment { get; }
         
         void Save();
 

@@ -9,18 +9,22 @@ using System.Threading.Tasks;
 
 namespace Repositories.Veriler
 {
-    public class UserRoleVeriler:IEntityTypeConfiguration<UserRole>
+    public class UserRoleVeriler : IEntityTypeConfiguration<UserRole>
     {
-        
-
         public void Configure(EntityTypeBuilder<UserRole> builder)
         {
-            builder.HasKey(ur => ur.UserRoleId);
-            builder.Property(ur=>ur.UserRoleName);
             builder.HasData(
-                new UserRole() { UserRoleId = 1, UserRoleName = "User" },
-                new UserRole() { UserRoleId = 2, UserRoleName = "Admin" }
-                );
+                new UserRole
+                {
+                    UserRoleId = 1,
+                    UserRoleName = "User"
+                },
+                new UserRole
+                {
+                    UserRoleId = 2,
+                    UserRoleName = "Admin"
+                }
+            );
         }
     }
 }

@@ -1,7 +1,12 @@
-﻿using Entities.Dtos;
+﻿using Entities.Dtos.LoginDtos;
+using Entities.Dtos.UserDtos;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Repositories.InterfaceClass;
 using Services.InterfaceClass;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MakaleWebProje.Controllers
 {
@@ -34,7 +39,7 @@ namespace MakaleWebProje.Controllers
                 {
                     return View(userDto);
                 }
-
+                userDto.UserRoleId = 1;
                 _manager.UsersServices.CreateUser(userDto);
                 return RedirectToAction("Login");
             }
@@ -52,7 +57,7 @@ namespace MakaleWebProje.Controllers
             var userId = HttpContext.Session.GetInt32("UserId");
             if (userId != null)
             {
-                return RedirectToAction("ProfileDetails", "Profile");
+               return RedirectToAction("Index", "Home");
             }
 
             // Oturum boşsa giriş sayfasını göster
@@ -60,7 +65,7 @@ namespace MakaleWebProje.Controllers
         }
 
         [HttpPost]
-        public IActionResult Login(LoginDto loginDto)
+        public async Task<IActionResult> Login(LoginDto loginDto)
         {
             try
             {
@@ -68,9 +73,15 @@ namespace MakaleWebProje.Controllers
                 {
                     return View(loginDto);
                 }
-                
+
                 var user = _manager.UsersServices.GetAllUsers(trackChanges: true)
-                                       .FirstOrDefault(u => u.UserName == loginDto.UserName && u.Password == loginDto.Password);
+                                               .FirstOrDefault(u => u.UserName == loginDto.UserName );
+                bool isPasswordValid = _manager.UsersServices.VerifyPassword(user.UserId, loginDto.Password);
+                if (!isPasswordValid)
+                {
+                    ModelState.AddModelError("", "Geçersiz kullanıcı adı veya şifre.");
+                    return View(loginDto);
+                }
 
                 if (user == null)
                 {
@@ -80,15 +91,33 @@ namespace MakaleWebProje.Controllers
 
                 // Kullanıcı ID'sini oturuma kaydet
                 HttpContext.Session.SetInt32("UserId", user.UserId);
+                ViewData["UserId"] = user.UserId;
 
-                return RedirectToAction("ProfileDetails", "Profile");
+                HttpContext.Session.SetInt32("UserRoleId", user.UserRoleId);
+
+                var userRoleName = user.UserRoleId == 1 ? "User" : "Admin"; // Eğer 1 User rolü, diğer Admin
+
+                // Kullanıcı rolünü Claim olarak ekliyoruz
+                var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.Name, user.UserName),
+                    new Claim(ClaimTypes.Role, userRoleName) // Burada manuel olarak rolü ekliyoruz
+                };
+
+                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
+
+                return RedirectToAction("index", "home");
             }
             catch (Exception ex)
             {
                 ModelState.AddModelError("", ex.Message);
                 return View(loginDto);
             }
-
         }
+
+
+
+
     }
 }

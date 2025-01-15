@@ -1,4 +1,4 @@
-﻿using Entities.Dtos;
+﻿using Entities.Dtos.UserDtos;
 using Entities.Models;
 using System;
 using System.Collections.Generic;
@@ -21,11 +21,18 @@ namespace Services.InterfaceClass
 
         // Kullanıcı güncelleme
         void UpdateUser(UserDtoUpdate userDto);
+        void UpdateUserChangeProfile(UserDtoUpdate userDto);
 
         // Kullanıcı silme
         void DeleteUser(int id);
 
         // Kullanıcı güncelleme için gerekli bilgileri alma
         UserDtoUpdate GetOneUserUpdate(int id, bool trackChanges);
+
+        void AssignRoleToUser(int userId, int roleId);
+        public void DeleteCommentsByUserId(int userId);
+
+        bool VerifyPassword(int userId, string enteredPassword);
+        string HashPassword(string password);
     }
 }

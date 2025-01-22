@@ -18,5 +18,7 @@ namespace Services.InterfaceClass
         int GetCommentCountByMakaleId(int makaleId, bool trackChanges);
         IEnumerable<MakaleComment> GetRecentComments(int count, bool trackChanges);
         IEnumerable<MakaleComment> GetActiveCommentsByMakaleId(int makaleId, bool trackChanges);
+        IEnumerable<MakaleComment> GetAllMakaleComment(bool trackChanges);
+       
     }
 }

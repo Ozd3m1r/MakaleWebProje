@@ -38,23 +38,34 @@
         overflow: hidden;
     }
 
-    .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 .5rem 1rem rgba(0,0,0,.15) !important;
-    }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 .5rem 1rem rgba(0,0,0,.15) !important;
+        }
 
     .showcase-section {
         animation: fadeIn 1s ease-in;
     }
 
-    @@keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+   @@keyframes fadeIn {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(20px);
     }
-</style> 
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+
+    /* Carousel resim boyutunu sabitlemek için ekleme */
+    .carousel-item img {
+        width: 100%; /* Enini 100% yaparak her zaman kapsayıcıya uydurur */
+        height: 300px; /* Sabit bir yükseklik */
+        object-fit: cover; /* Resmin orantılı şekilde sığmasını sağlar */
+    }
+</style>

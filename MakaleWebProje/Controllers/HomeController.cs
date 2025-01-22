@@ -35,6 +35,10 @@ namespace MakaleWebProje.Controllers
         {
             return View(new  { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+        public IActionResult About()
+        {
+            return View();
+        }
       
     }
 }

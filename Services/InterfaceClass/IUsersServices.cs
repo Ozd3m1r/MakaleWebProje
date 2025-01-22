@@ -34,5 +34,7 @@ namespace Services.InterfaceClass
 
         bool VerifyPassword(int userId, string enteredPassword);
         string HashPassword(string password);
+        Users GetByUserName(string userName, bool trackChanges = false);
+        Users GetByEmail(string email, bool trackChanges = false);
     }
 }

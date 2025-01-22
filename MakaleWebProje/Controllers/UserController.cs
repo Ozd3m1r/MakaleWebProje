@@ -31,23 +31,57 @@ namespace MakaleWebProje.Controllers
             return View();
         }
         [HttpPost]
-        public IActionResult Register(UserDtoInsertion userDto)
+        public IActionResult Register([FromForm] UserDtoInsertion userDto, string confirmPassword)
         {
             try
             {
                 if (!ModelState.IsValid)
                 {
-                    return View(userDto);
+                    return Json(new { success = false, message = "Lütfen tüm alanları doldurun." });
                 }
-                userDto.UserRoleId = 1;
+
+                if (userDto.Password != confirmPassword)
+                {
+                    return Json(new { success = false, message = "Şifreler eşleşmiyor." });
+                }
+
+                // Email veya kullanıcı adı kontrolü
+                var existingUser = _manager.UsersServices.GetByUserName(userDto.UserName);
+                if (existingUser != null)
+                {
+                    return Json(new { success = false, message = "Bu kullanıcı adı zaten kullanılıyor." });
+                }
+
+                existingUser = _manager.UsersServices.GetByEmail(userDto.Email);
+                if (existingUser != null)
+                {
+                    return Json(new { success = false, message = "Bu email adresi zaten kullanılıyor." });
+                }
+
+                // Varsayılan olarak User rolü atama
+                userDto.UserRoleId = 1; // User rolü ID'si
+
                 _manager.UsersServices.CreateUser(userDto);
-                return RedirectToAction("Login");
+
+                return Json(new
+                {
+                    success = true,
+                    message = "Kayıt işlemi başarıyla tamamlandı. Giriş sayfasına yönlendiriliyorsunuz."
+                });
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", ex.Message);
-                return View(userDto);
+                return Json(new
+                {
+                    success = false,
+                    message = "Kayıt işlemi sırasında bir hata oluştu: " + ex.Message
+                });
             }
+        }
+        public IActionResult SweetAlertDemo()
+        {
+
+            return View();
         }
 
         [HttpGet]
@@ -71,48 +105,43 @@ namespace MakaleWebProje.Controllers
             {
                 if (!ModelState.IsValid)
                 {
-                    return View(loginDto);
+                    return Json(new { success = false, message = "Lütfen tüm alanları doldurun." });
                 }
 
                 var user = _manager.UsersServices.GetAllUsers(trackChanges: true)
-                                               .FirstOrDefault(u => u.UserName == loginDto.UserName );
-                bool isPasswordValid = _manager.UsersServices.VerifyPassword(user.UserId, loginDto.Password);
-                if (!isPasswordValid)
-                {
-                    ModelState.AddModelError("", "Geçersiz kullanıcı adı veya şifre.");
-                    return View(loginDto);
-                }
+                                               .FirstOrDefault(u => u.UserName == loginDto.UserName);
 
                 if (user == null)
                 {
-                    ModelState.AddModelError("", "Geçersiz kullanıcı adı veya şifre.");
-                    return View(loginDto);
+                    return Json(new { success = false, message = "Geçersiz kullanıcı adı veya şifre." });
+                }
+
+                bool isPasswordValid = _manager.UsersServices.VerifyPassword(user.UserId, loginDto.Password);
+                if (!isPasswordValid)
+                {
+                    return Json(new { success = false, message = "Geçersiz kullanıcı adı veya şifre." });
                 }
 
                 // Kullanıcı ID'sini oturuma kaydet
                 HttpContext.Session.SetInt32("UserId", user.UserId);
-                ViewData["UserId"] = user.UserId;
-
                 HttpContext.Session.SetInt32("UserRoleId", user.UserRoleId);
 
-                var userRoleName = user.UserRoleId == 1 ? "User" : "Admin"; // Eğer 1 User rolü, diğer Admin
+                var userRoleName = user.UserRoleId == 1 ? "User" : "Admin";
 
-                // Kullanıcı rolünü Claim olarak ekliyoruz
                 var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Name, user.UserName),
-                    new Claim(ClaimTypes.Role, userRoleName) // Burada manuel olarak rolü ekliyoruz
-                };
+        {
+            new Claim(ClaimTypes.Name, user.UserName),
+            new Claim(ClaimTypes.Role, userRoleName)
+        };
 
                 var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
 
-                return RedirectToAction("index", "home");
+                return Json(new { success = true, message = "Giriş başarılı! Yönlendiriliyorsunuz..." });
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", ex.Message);
-                return View(loginDto);
+                return Json(new { success = false, message = "Bir hata oluştu: " + ex.Message });
             }
         }
 

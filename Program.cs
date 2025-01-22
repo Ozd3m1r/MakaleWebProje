@@ -42,8 +42,9 @@ builder.Services.AddDbContext<RepositoryContext>(options =>
         warnings.Ignore(RelationalEventId.PendingModelChangesWarning));
 });
 
+builder.Services.AddScoped<IMakaleCommentRepository, MakaleCommentRepository>();
+builder.Services.AddScoped<IUsersRepository, UsersRepository>();
 builder.Services.AddScoped<IRepositoryManager, RepositoryManager>();
-builder.Services.AddScoped<IMakaleCommentService, MakaleCommentService>();
 
 var app = builder.Build();
 

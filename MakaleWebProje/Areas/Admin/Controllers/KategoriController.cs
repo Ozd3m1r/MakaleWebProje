@@ -10,10 +10,12 @@ namespace MakaleWebProje.Areas.Admin.Controllers
     public class KategoriController : Controller
     {
         private readonly IKategoriServices _kategoriServices;
+        private readonly IServiceManager _manager;
 
-        public KategoriController(IKategoriServices kategoriServices)
+        public KategoriController(IKategoriServices kategoriServices, IServiceManager manager)
         {
             _kategoriServices = kategoriServices;
+            _manager = manager;
         }
 
         // Kategori listeleme (Admin)
@@ -64,8 +66,8 @@ namespace MakaleWebProje.Areas.Admin.Controllers
             {
                 return View(kategori);
             }
-
-            _kategoriServices.UpdateKategori(kategori);
+            _manager.KategoriServices.UpdateKategori(kategori);
+            //_kategoriServices.UpdateKategori(kategori);
             TempData["Message"] = "Kategori başarıyla güncellendi.";
             return RedirectToAction("Index");
         }

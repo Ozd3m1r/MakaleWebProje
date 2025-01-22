@@ -59,5 +59,9 @@ namespace Services
         {
             return  _manager.MakaleComment.GetActiveCommentsByMakaleId(makaleId, trackChanges);
         }
+        public IEnumerable<MakaleComment> GetAllMakaleComment(bool trackChanges)
+        {
+            return _manager.MakaleComment.GetAllMakaleComment(trackChanges);
+        }
     }
 }

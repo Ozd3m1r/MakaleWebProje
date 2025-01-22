@@ -33,4 +33,6 @@ public interface IMakaleCommentRepository : IRepositoryBase<MakaleComment>
     //Kullanıcı Id göre silme işlemi 
 
     public void DeleteCommentsByUserId(int userId);
+
+    IEnumerable<MakaleComment> GetAllMakaleComment(bool trackChanges);
 }

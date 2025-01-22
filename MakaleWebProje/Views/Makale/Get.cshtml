@@ -12,9 +12,6 @@
         <div class="article-meta">
             <span class="date"><i class="bi bi-calendar3"></i> @Model.MakaleDate?.ToString()</span>
             <span class="category"><i class="bi bi-folder2"></i> @Model.Kategori?.KategoriName</span>
-            <span class="stats">
-                @* <i class="bi bi-eye"></i> @Model.ViewCount görüntülenme *@
-            </span>
         </div>
     </div>
 
@@ -24,167 +21,119 @@
     </div>
 
     <!-- Makale Özeti -->
-    <div class="article-summary">
-        <p class="lead">@Model?.MakaleSummary</p>
+    <div class="article-summary-wrapper">
+        <div class="article-summary">
+            <p class="lead">@Model?.MakaleSummary</p>
+        </div>
     </div>
 
     <!-- İçerik -->
-    <div class="article-content">
-        @Html.Raw(Model?.MakaleContent)
+    <div class="article-content-wrapper">
+        <div class="article-content">
+            <p class="Lead">@Html.Raw(Model?.MakaleContent)</p>
+        </div>
     </div>
 
     <!-- Etkileşim Bölümü -->
-    <div class="article-interactions">
-        @if (isUserLoggedIn)
-        {
-            <div class="interaction-buttons">
-                <form action="@Url.Action("OnPostLike", "Makale", new { MakaleId = Model.MakaleId, returnUrl = ViewContext.HttpContext.Request.Path })"
-                      method="post" class="d-inline">
-                    <button type="submit" class="btn btn-interaction like-btn">
-                        <i class="bi bi-hand-thumbs-up"></i>
-                        <span class="count">@likesCount</span>
-                    </button>
-                </form>
+    <div class="article-interactions-wrapper">
+        <div class="article-interactions">
+            @if (isUserLoggedIn)
+            {
+                <div class="interaction-buttons">
+                    <form action="@Url.Action("OnPostLike", "Makale", new { MakaleId = Model.MakaleId, returnUrl = ViewContext.HttpContext.Request.Path })"
+                          method="post" class="d-inline">
+                        <button type="submit" class="btn btn-interaction like-btn">
+                            <i class="bi bi-hand-thumbs-up"></i>
+                            <span class="count">@likesCount</span>
+                        </button>
+                    </form>
 
-                <form action="@Url.Action("OnPostDislike", "Makale", new { MakaleId = Model.MakaleId, returnUrl = ViewContext.HttpContext.Request.Path })"
-                      method="post" class="d-inline">
-                    <button type="submit" class="btn btn-interaction dislike-btn">
-                        <i class="bi bi-hand-thumbs-down"></i>
-                        <span class="count">@dislikesCount</span>
-                    </button>
-                </form>
-            </div>
-        }
-        else
-        {
-            <div class="login-prompt">
-                <p>
-                    <i class="bi bi-info-circle"></i>
-                    Makaleleri beğenmek için <a href="/User/Login" class="login-link">giriş yapın</a>
-                </p>
-            </div>
-        }
+                    <form action="@Url.Action("OnPostDislike", "Makale", new { MakaleId = Model.MakaleId, returnUrl = ViewContext.HttpContext.Request.Path })"
+                          method="post" class="d-inline">
+                        <button type="submit" class="btn btn-interaction dislike-btn">
+                            <i class="bi bi-hand-thumbs-down"></i>
+                            <span class="count">@dislikesCount</span>
+                        </button>
+                    </form>
+                </div>
+            }
+            else
+            {
+                <div class="login-prompt">
+                    <p>
+                        <i class="bi bi-info-circle"></i>
+                        Makaleleri beğenmek için <a href="/User/Login" class="login-link">giriş yapın</a>
+                    </p>
+                </div>
+            }
+        </div>
     </div>
-
 
     <!-- Yorumlar Bölümü -->
+    <div class="comments-wrapper">
+        <div class="comments-section">
+            <h3>Yorumlar</h3>
 
-    <div class="comments-section">
-
-        <h3>Yorumlar</h3>
-
-
-
-        @if (isUserLoggedIn)
-
-        {
-
-            <div class="comment-form">
-
-                <form action="@Url.Action("AddComment", "Makale")" method="post">
-
-                    <input type="hidden" name="makaleId" value="@Model.MakaleId" />
-
-                    <div class="form-group">
-
-                        <textarea name="comment" class="form-control" rows="3"
-                                  placeholder="Yorumunuzu yazın..." required></textarea>
-
-                    </div>
-
-                    <button type="submit" class="btn btn-primary mt-2">
-
-                        <i class="bi bi-chat-dots"></i> Yorum Yap
-
-                    </button>
-
-                </form>
-
-            </div>
-
-        }
-
-        else
-
-        {
-
-            <div class="alert alert-info">
-
-                <i class="bi bi-info-circle"></i>
-
-                Yorum yapmak için <a href="/User/Login">giriş yapın</a>
-
-            </div>
-
-        }
-
-
-
-        <div class="comments-list mt-4">
-            @{
-                var comments = ViewBag.Comments as List<MakaleComment>;
-            }
-            @if (comments != null && comments.Count>1)
-
+            @if (isUserLoggedIn)
             {
-
-                foreach (var comment in ViewBag.Comments)
-
-                {
-
-                    <div class="comment-item">
-
-                        <div class="comment-header">
-
-                            <span class="user-name">@comment.Users.UserName</span>
-
-                            <span class="comment-date">@comment.CreatedDate.ToString("dd MMM yyyy HH:mm")</span>
-
+                <div class="comment-form">
+                    <form action="@Url.Action("AddComment", "Makale")" method="post">
+                        <input type="hidden" name="makaleId" value="@Model.MakaleId" />
+                        <div class="form-group">
+                            <textarea name="comment" class="form-control" rows="3"
+                                      placeholder="Yorumunuzu yazın..." required></textarea>
                         </div>
-
-                        <div class="comment-content">
-
-                            @comment.Comment
-
-                        </div>
-
-                        @if (HttpContextAccessor.HttpContext.Session.GetInt32("UserId") == comment.UserId)
-
-                        {
-
-                            <form action="@Url.Action("DeleteComment", "Makale")" method="post" class="delete-comment">
-
-                                <input type="hidden" name="commentId" value="@comment.MakaleCommentId" />
-
-                                <input type="hidden" name="makaleId" value="@Model.MakaleId" />
-
-                                <button type="submit" class="btn btn-sm btn-danger">
-
-                                    <i class="bi bi-trash"></i>
-
-                                </button>
-
-                            </form>
-
-                        }
-
-                    </div>
-
-                }
-
+                        <button type="submit" class="btn btn-primary mt-2">
+                            <i class="bi bi-chat-dots"></i> Yorum Yap
+                        </button>
+                    </form>
+                </div>
             }
-
             else
-
             {
-
-                <p class="text-muted">Henüz yorum yapılmamış. İlk yorumu siz yapın!</p>
-
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i>
+                    Yorum yapmak için <a href="/User/Login">giriş yapın</a>
+                </div>
             }
 
+            <div class="comments-list mt-4">
+                @{
+                    var comments = ViewBag.Comments as List<MakaleComment>;
+                }
+                @if (comments != null && comments.Count > 0)
+                {
+                    foreach (var comment in comments)
+                    {
+                        <div class="comment-item">
+                            <div class="comment-header">
+                                <span class="user-name">@comment.Users.UserName</span>
+                                <span class="comment-date">@comment.CreatedDate.ToString("dd MMM yyyy HH:mm")</span>
+                            </div>
+                            <div class="comment-content">
+                                @comment.Comment
+                            </div>
+                            @if (HttpContextAccessor.HttpContext.Session.GetInt32("UserId") == comment.UserId)
+                            {
+                                <form action="@Url.Action("DeleteComment", "Makale")" method="post" class="delete-comment">
+                                    <input type="hidden" name="commentId" value="@comment.MakaleCommentId" />
+                                    <input type="hidden" name="makaleId" value="@Model.MakaleId" />
+                                    <button type="submit" class="btn btn-sm btn-danger">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            }
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="text-muted">Henüz yorum yapılmamış. İlk yorumu siz yapın!</p>
+                }
+            </div>
         </div>
-
     </div>
+
     <!-- Navigasyon Butonları -->
     <div class="article-navigation">
         <a class="btn btn-outline-primary" href="@Url.Action("Index", "Makale")">
@@ -247,29 +196,42 @@
         transform: scale(1.02);
     }
 
+    .article-summary-wrapper {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        margin: 2rem 0;
+        border-left: 4px solid var(--primary-color);
+    }
+
     .article-summary {
         font-size: 1.2rem;
         line-height: 1.8;
         color: #444;
-        margin: 2rem 0;
         padding: 1.5rem;
-        background-color: #f8f9fa;
+    }
+
+    .article-content-wrapper {
+        background-color: #ffffff;
         border-radius: 10px;
-        border-left: 4px solid var(--primary-color);
+        margin: 2rem 0;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
 
     .article-content {
         line-height: 1.8;
         color: #333;
+        padding: 2rem;
+    }
+
+    .article-interactions-wrapper {
+        background-color: #f8f9fa;
+        border-radius: 10px;
         margin: 2rem 0;
     }
 
     .article-interactions {
         text-align: center;
-        margin: 2rem 0;
         padding: 1rem;
-        background-color: #f8f9fa;
-        border-radius: 10px;
     }
 
     .interaction-buttons {
@@ -317,6 +279,38 @@
 
     .login-link:hover {
         text-decoration: underline;
+    }
+
+    .comments-wrapper {
+        background-color: #ffffff;
+        border-radius: 10px;
+        margin: 2rem 0;
+        padding: 2rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .comment-item {
+        background-color: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+    }
+
+    .comment-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .user-name {
+        font-weight: 600;
+        color: var(--primary-color);
+    }
+
+    .comment-date {
+        font-size: 0.9rem;
+        color: #666;
     }
 
     .article-navigation {

@@ -7,12 +7,12 @@
     <div class="card shadow-sm">
         <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
             <h3 class="mb-0">Profil Güncelle</h3>
-            <a href="@Url.Action("UserDetail", new { id = Model.Id })" class="btn btn-light">
+            <a href="@Url.Action("ProfileDetails", "Profile")" class="btn btn-light">
                 <i class="bi bi-arrow-left"></i> Profile Dön
             </a>
         </div>
         <div class="card-body">
-            <form asp-action="Update" method="post" class="needs-validation" novalidate>
+            <form asp-action="Update" method="post" id="updateForm" class="needs-validation" novalidate>
                 <input type="hidden" asp-for="Id" />
                 <input type="hidden" asp-for="Password" />
                 <input type="hidden" asp-for="UserRoleId" />
@@ -61,7 +61,7 @@
                     <button type="submit" class="btn btn-primary">
                         <i class="bi bi-check-lg"></i> Güncelle
                     </button>
-                    <a href="@Url.Action("UserDetail", new { id = Model.Id })" class="btn btn-secondary">
+                    <a href="@Url.Action("ProfileDetails", "Profile")" class="btn btn-secondary">
                         <i class="bi bi-x"></i> İptal
                     </a>
                 </div>
@@ -72,4 +72,73 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-} 
+    <script>
+        document.getElementById('updateForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Loading göster
+            Swal.fire({
+                title: 'Lütfen Bekleyin',
+                text: 'Profil güncelleniyor...',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            // Form verilerini topla
+            var formData = new FormData(this);
+
+            // AJAX ile form gönderimi
+            fetch(this.action, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        title: 'Başarılı!',
+                        text: data.message || 'Profiliniz başarıyla güncellendi.',
+                        icon: 'success',
+                        confirmButtonText: 'Tamam',
+                        confirmButtonColor: '#28a745'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = '/Profile/ProfileDetails';
+                        }
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Hata!',
+                        text: data.message,
+                        icon: 'error',
+                        confirmButtonText: 'Tamam',
+                        confirmButtonColor: '#d33'
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    title: 'Hata!',
+                    text: 'Bir hata oluştu. Lütfen tekrar deneyin.',
+                    icon: 'error',
+                    confirmButtonText: 'Tamam',
+                    confirmButtonColor: '#d33'
+                });
+            });
+        });
+
+        // Validation mesajlarını göster
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('input', function() {
+                const errorSpan = this.nextElementSibling;
+                if (errorSpan && errorSpan.classList.contains('text-danger')) {
+                    errorSpan.textContent = '';
+                }
+            });
+        });
+    </script>
+}

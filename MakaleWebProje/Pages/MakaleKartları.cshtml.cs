@@ -26,7 +26,8 @@ namespace MakaleWebProje.Pages
         }
         public IActionResult OnPost(int MakaleId, string returnUrl)
         {
-            Makale? makale = _manager.MakaleServices.GetOneMakale(MakaleId, true);
+            Makale? makale = _manager.
+                MakaleServices.GetOneMakale(MakaleId, true);
             if (makale != null)
             {
                 // Cart = HttpContext.Session.GetJson<Cart>("Cart") ?? new Cart();//models/SessionCart kurulu
@@ -36,14 +37,7 @@ namespace MakaleWebProje.Pages
             }
             return RedirectToPage(new { returnUrl = returnUrl });
         }
-      /*  public IActionResult OnPostRemove(int MakaleId, string returnUrl)
-        {
-            //   Cart = HttpContext.Session.GetJson<Cart>("Cart") ?? new Cart();//models/SessionCart kurulu
 
-            Cart.RemoveLine(Cart.Lines.First(c1 => c1.Product.ProductId.Equals(id)).Product);
-            // HttpContext.Session.Setjson<Cart>("Cart", Cart);//models/SessionCart kurulu
-            return Page();
-        }*/
    }
 }
 

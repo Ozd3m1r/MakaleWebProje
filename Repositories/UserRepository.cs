@@ -117,5 +117,14 @@ namespace Repositories
             // Veritabanındaki hash ile karşılaştırıyoruz
             return enteredPasswordHash == storedPassword;
         }
+        public Users GetByUserName(string userName, bool trackChanges = false)
+        {
+            return FindByCondition(u => u.UserName.ToLower() == userName.ToLower(), trackChanges);
+        }
+
+        public Users GetByEmail(string email, bool trackChanges = false)
+        {
+            return FindByCondition(u => u.Email.ToLower() == email.ToLower(), trackChanges);
+        }
     }
 }

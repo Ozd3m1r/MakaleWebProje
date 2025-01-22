@@ -161,6 +161,15 @@ namespace Services
         {
             _manager.MakaleComment.DeleteCommentsByUserId(userId);
         }
+        public Users GetByUserName(string userName, bool trackChanges = false)
+        {
+            return _manager.Users.GetByUserName(userName, trackChanges);
+        }
+
+        public Users GetByEmail(string email, bool trackChanges = false)
+        {
+            return _manager.Users.GetByEmail(email, trackChanges);
+        }
 
         // SHA-256 ile şifreyi hash'leme
         public string HashPassword(string password)

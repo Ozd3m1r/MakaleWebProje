@@ -33,9 +33,7 @@
                                     <i class="bi bi-trash"></i> Sil
                                 </button>
                             </form>
-                            <a href="@Url.Action("AssignRole", new { userId = user.UserId })" class="btn btn-warning btn-sm">
-                                <i class="bi bi-pencil"></i> Rol Düzenle
-                            </a>
+                            
                             <a href="@Url.Action("Update", new { id = user.UserId })" class="btn btn-primary btn-sm">
                                 <i class="bi bi-pencil-square"></i> Düzenle
                             </a>
@@ -72,10 +70,6 @@
                                     <i class="bi bi-trash"></i> Sil
                                 </button>
                             </form>
-                          
-                            <a href="@Url.Action("AssignRole", new { userId = user.UserId })" class="btn btn-warning btn-sm">
-                                <i class="bi bi-pencil"></i> Rol Düzenle
-                            </a>
                             <a href="@Url.Action("Update", new { id = user.UserId })" class="btn btn-primary btn-sm">
                                 <i class="bi bi-pencil-square"></i> Düzenle
                             </a>
@@ -86,19 +80,3 @@
         </tbody>
     </table>
 
-    <!-- Yeni Kullanıcı Ekleme Butonu -->
-    <div class="mt-3">
-        <a href="@Url.Action("Create")" class="btn btn-success">
-            <i class="bi bi-plus-circle"></i> Yeni Kullanıcı Ekle
-        </a>
-    </div>
-</div>
-
-@section Scripts {
-    <script>
-        // Silme işlemi için onay
-        function confirmDelete() {
-            return confirm("Bu kullanıcıyı silmek istediğinize emin misiniz?");
-        }
-    </script>
-} 

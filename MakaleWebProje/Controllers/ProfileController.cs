@@ -7,6 +7,7 @@ using Repositories.InterfaceClass;
 using Services.InterfaceClass;
 using System.Text;
 using System.Security.Cryptography;
+using System.Net.Mail;
 
 namespace MakaleWebProje.Controllers
 {
@@ -79,45 +80,118 @@ namespace MakaleWebProje.Controllers
         [HttpPost]
         public IActionResult Update(UserDtoUpdate model)
         {
-            if (!ModelState.IsValid)
-                return View(model);
-
-            var user = _manager.UsersServices.GetUserById(model.Id, trackChanges: true);
-            if (user == null)
-                return NotFound();
-
-            // Oturum kontrolü
-            var sessionUserId = HttpContext.Session.GetInt32("UserId");
-            if (sessionUserId != model.Id)
-            {
-                return Unauthorized("Bu işlem için yetkiniz yok.");
-            }
-
-            // Şifre kontrolü (Mevcut şifreyi hash'leyerek kontrol ediyoruz)
-            if (sessionUserId is int)
-            {
-                var currentPasswordHash = _manager.UsersServices.GetUserById(sessionUserId.Value, false).Password;
-                if (currentPasswordHash != HashPassword(model.CurrentPassword)) // SHA-256 ile hash'lenmiş şifreyi kontrol ediyoruz
-                {
-                    ModelState.AddModelError("CurrentPassword", "Mevcut şifre yanlış");
-                    return View(model);
-                }
-            }
-
             try
             {
-                // Şifre doğrulandıysa, değişiklikleri uygula
+                if (!ModelState.IsValid)
+                {
+                    return Json(new { success = false, message = "Lütfen tüm alanları doğru şekilde doldurun." });
+                }
 
-                _manager.UsersServices.UpdateUserChangeProfile(model);
+                var user = _manager.UsersServices.GetUserById(model.Id, trackChanges: true);
+                if (user == null)
+                    return Json(new { success = false, message = "Kullanıcı bulunamadı." });
 
-                TempData["Message"] = "Profiliniz başarıyla güncellendi.";
-                return RedirectToAction("ProfileDetails", "Profile");
+                // Oturum kontrolü
+                var sessionUserId = HttpContext.Session.GetInt32("UserId");
+                if (sessionUserId != model.Id)
+                {
+                    return Json(new { success = false, message = "Bu işlem için yetkiniz bulunmamaktadır." });
+                }
+
+                // Boş alan kontrolü
+                if (string.IsNullOrEmpty(model.Name) || string.IsNullOrEmpty(model.SurName) ||
+                    string.IsNullOrEmpty(model.Email) || string.IsNullOrEmpty(model.UserName))
+                {
+                    return Json(new { success = false, message = "Lütfen tüm alanları doldurun." });
+                }
+
+                // Email formatı kontrolü
+                //if (!IsValidEmail(model.Email))
+                //{
+                //    return Json(new { success = false, message = "Lütfen geçerli bir email adresi girin." });
+                //}
+
+
+                // Email kontrolü
+                if (user.Email != model.Email)
+                {
+                    var existingEmail = _manager.UsersServices.GetByEmail(model.Email, false);
+                    if (existingEmail != null)
+                    {
+                        return Json(new { success = false, message = "Bu email adresi başka bir kullanıcı tarafından kullanılıyor." });
+                    }
+                }
+
+                // Kullanıcı adı kontrolü
+                if (user.UserName != model.UserName)
+                {
+                    var existingUserName = _manager.UsersServices.GetByUserName(model.UserName, false);
+                    if (existingUserName != null)
+                    {
+                        return Json(new { success = false, message = "Bu kullanıcı adı başka bir kullanıcı tarafından kullanılıyor." });
+                    }
+                }
+
+                // Şifre kontrolü
+                if (string.IsNullOrEmpty(model.CurrentPassword))
+                {
+                    return Json(new { success = false, message = "Lütfen mevcut şifrenizi girin." });
+                }
+
+                var currentPasswordHash = HashPassword(model.CurrentPassword);
+                if (user.Password != currentPasswordHash)
+                {
+                    return Json(new { success = false, message = "Mevcut şifreniz yanlış. Lütfen kontrol edip tekrar deneyin." });
+                }
+
+                // UpdateUserChangeProfile metodunu try-catch içinde çağır
+                try
+                {
+                    _manager.UsersServices.UpdateUserChangeProfile(model);
+                    return Json(new
+                    {
+                        success = true,
+                        message = "Profiliniz başarıyla güncellendi. Yönlendiriliyorsunuz..."
+                    });
+                }
+                catch (Exception)
+                {
+                    // Benzersizlik hatası durumunda
+                    var checkUserName = _manager.UsersServices.GetByUserName(model.UserName, false);
+                    if (checkUserName != null && checkUserName.UserId != model.Id)
+                    {
+                        return Json(new
+                        {
+                            success = false,
+                            message = "Bu kullanıcı adı başka bir kullanıcı tarafından kullanılıyor."
+                        });
+                    }
+
+                    var checkEmail = _manager.UsersServices.GetByEmail(model.Email, false);
+                    if (checkEmail != null && checkEmail.UserId != model.Id)
+                    {
+                        return Json(new
+                        {
+                            success = false,
+                            message = "Bu email adresi başka bir kullanıcı tarafından kullanılıyor."
+                        });
+                    }
+
+                    // Diğer hatalar için
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Güncelleme işlemi sırasında bir hata oluştu. Lütfen daha sonra tekrar deneyin."
+                    });
+                }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                // Log the error
-                ModelState.AddModelError("", "Güncelleme sırasında bir hata oluştu.");
-                return View(model);
+                return Json(new
+                {
+                    success = false,
+                    message = "Güncelleme işlemi sırasında bir hata oluştu. Lütfen daha sonra tekrar deneyin."
+                });
             }
         }
 
@@ -186,57 +260,67 @@ namespace MakaleWebProje.Controllers
         [HttpPost]
         public IActionResult ChangePassword(ChangePasswordDto model)
         {
-            if (!ModelState.IsValid)
-                return View(model);
-
-            var userId = HttpContext.Session.GetInt32("UserId");
-            if (userId == null)
+            try
             {
-                return RedirectToAction("Login", "User");
-            }
+                if (!ModelState.IsValid)
+                {
+                    return Json(new { success = false, message = "Lütfen tüm alanları doldurun." });
+                }
 
-            var user = _manager.UsersServices.GetUserById(userId.Value, trackChanges: false);
-            if (user == null)
+                var userId = HttpContext.Session.GetInt32("UserId");
+                if (userId == null)
+                {
+                    return Json(new { success = false, message = "Oturum süreniz dolmuş. Lütfen tekrar giriş yapın." });
+                }
+
+                var user = _manager.UsersServices.GetUserById(userId.Value, trackChanges: false);
+                if (user == null)
+                {
+                    return Json(new { success = false, message = "Kullanıcı bulunamadı." });
+                }
+
+                // Mevcut şifre kontrolü
+                var currentPasswordHash = _manager.UsersServices.HashPassword(model.CurrentPassword);
+                if (user.Password != currentPasswordHash)
+                {
+                    return Json(new { success = false, message = "Mevcut şifreniz yanlış." });
+                }
+
+                // Yeni şifre kontrolü
+                if (model.NewPassword != model.ConfirmPassword)
+                {
+                    return Json(new { success = false, message = "Yeni şifreler eşleşmiyor." });
+                }
+
+                // Şifre güncelleme
+                var userDtoUpdate = new UserDtoUpdate
+                {
+                    Id = user.UserId,
+                    Name = user.Name,
+                    SurName = user.SurName,
+                    UserName = user.UserName,
+                    Email = user.Email,
+                    Password = model.NewPassword,
+                    UserRoleId = user.UserRoleId
+                };
+
+                _manager.UsersServices.UpdateUser(userDtoUpdate);
+
+                return Json(new
+                {
+                    success = true,
+                    message = "Şifreniz başarıyla güncellendi. Yönlendiriliyorsunuz..."
+                });
+            }
+            catch (Exception)
             {
-                ModelState.AddModelError("", "Kullanıcı bulunamadı.");
-                return View(model);
+                return Json(new
+                {
+                    success = false,
+                    message = "Şifre güncelleme işlemi sırasında bir hata oluştu. Lütfen daha sonra tekrar deneyin."
+                });
             }
-            model.CurrentPassword = _manager.UsersServices.HashPassword(model.CurrentPassword);
-            // Şifre doğrulama (SHA-256 ile hash kontrolü)
-            if (user.Password != model.CurrentPassword)
-            {
-                Console.WriteLine("Girilmiş şifre: " + model.CurrentPassword);
-                Console.WriteLine("Veritabanındaki şifre (hash): " + user.Password);
-                ModelState.AddModelError("CurrentPassword", "Mevcut şifre yanlış.");
-                return View(model);
-            }
-
-            // Yeni şifrelerin eşleşip eşleşmediğini kontrol et
-            if (model.NewPassword != model.ConfirmPassword)
-            {
-                ModelState.AddModelError("ConfirmPassword", "Yeni şifreler eşleşmiyor.");
-                return View(model);
-            }
-
-            //model.NewPassword = _manager.UsersServices.HashPassword(model.NewPassword);
-            // Yeni şifreyi hash'leyerek güncelliyoruz
-            var userDtoUpdate = new UserDtoUpdate
-            {
-                Id = user.UserId,
-                Name = user.Name,
-                SurName = user.SurName,
-                UserName = user.UserName,
-                Email = user.Email,
-                Password = model.NewPassword, // Yeni şifreyi burada hash'liyoruz
-                UserRoleId = user.UserRoleId
-            };
-
-            // Şifreyi güncelle
-            _manager.UsersServices.UpdateUser(userDtoUpdate);
-
-            TempData["Message"] = "Şifreniz başarıyla güncellenmiştir.";
-            return RedirectToAction("ProfileDetails", "Profile");
-            }
+        }
     }
 }
 

@@ -58,7 +58,8 @@ namespace Repositories.RepositoryClass
             if (comment != null)
             {
                 comment.IsActive = false;
-                UpdateComment(comment);
+                Delete(comment);
+                _context.SaveChanges();
             }
         }
 
@@ -116,6 +117,10 @@ namespace Repositories.RepositoryClass
             {
                 _context.MakaleComment.RemoveRange(comments);
             }
+        }
+        public IEnumerable<MakaleComment> GetAllMakaleComment(bool trackChanges)
+        {
+            return FindAll(trackChanges).ToList();
         }
     }
 }

@@ -18,5 +18,8 @@ namespace Repositories.InterfaceClass
         void DeleteUser(int userId);
 
         bool VerifyPassword(string storedPassword, string enteredPassword);
+
+        Users GetByUserName(string userName, bool trackChanges = false);
+        Users GetByEmail(string email, bool trackChanges = false);
     }
 }

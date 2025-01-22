@@ -14,6 +14,6 @@ namespace Entities.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int KategoriId { get; set; }
         public string KategoriName { get; set; }
-        public ICollection<Makale> Makale { get; set; }
+        public ICollection<Makale>? Makale { get; set; }
     }
 }

@@ -6,20 +6,151 @@
 <div class="container mt-5 animate__animated animate__slideInRight">
     <div class="p-4 bg-light bg-opacity-75 rounded shadow" style="width: 400px; margin: auto;">
         <h2 class="text-center mb-4">Giriş Yap</h2>
-        <form asp-action="Login" method="post">
+        <form asp-action="Login" method="post" id="loginForm">
             <div class="mb-3">
                 <label for="UserName" class="form-label">Kullanıcı Adı</label>
-                <input asp-for="UserName" type="UserName" class="form-control" />
+                <input asp-for="UserName" class="form-control" />
                 <span asp-validation-for="UserName" class="text-danger"></span>
             </div>
             <div class="mb-3">
                 <label for="Password" class="form-label">Şifre</label>
-                <input asp-for="Password" type="password" class="form-control" />
+                <div class="input-group">
+                    <input asp-for="Password" type="password" class="form-control" />
+                    <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </div>
                 <span asp-validation-for="Password" class="text-danger"></span>
             </div>
-            <button type="submit" class="btn btn-primary w-100">
-                <i class="bi bi-box-arrow-in-right"></i> Giriş Yap
-            </button>
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-box-arrow-in-right"></i> Giriş Yap
+                </button>
+                <a href="@Url.Action("Register", "User")" class="btn btn-secondary">
+                    <i class="bi bi-person-plus"></i> Kayıt Ol
+                </a>
+            </div>
         </form>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        // Şifre göster/gizle fonksiyonu
+        document.querySelector('#togglePassword').addEventListener('click', function () {
+            const passwordInput = document.querySelector('[name="Password"]');
+            const icon = this.querySelector('i');
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('bi-eye');
+                icon.classList.add('bi-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('bi-eye-slash');
+                icon.classList.add('bi-eye');
+            }
+        });
+
+        // Form submit işlemi
+        document.getElementById('loginForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            // Boş alan kontrolü
+            const username = document.querySelector('[name="UserName"]').value;
+            const password = document.querySelector('[name="Password"]').value;
+
+            if (!username || !password) {
+                Swal.fire({
+                    title: 'Uyarı!',
+                    text: 'Lütfen tüm alanları doldurun.',
+                    icon: 'warning',
+                    confirmButtonText: 'Tamam',
+                    confirmButtonColor: '#3085d6'
+                });
+                return;
+            }
+
+            // Loading göster
+            Swal.fire({
+                title: 'Lütfen Bekleyin',
+                text: 'Giriş yapılıyor...',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            // Form verilerini topla
+            var formData = new FormData(this);
+
+            // AJAX ile form gönderimi
+            fetch(this.action, {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            title: 'Başarılı!',
+                            text: data.message,
+                            icon: 'success',
+                            showConfirmButton: false,
+                            timer: 1500,
+                            timerProgressBar: true
+                        }).then(() => {
+                            window.location.href = '/Home';
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Hata!',
+                            text: data.message,
+                            icon: 'error',
+                            confirmButtonText: 'Tamam',
+                            confirmButtonColor: '#d33'
+                        });
+                        // Şifre alanını temizle
+                        document.querySelector('[name="Password"]').value = '';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        title: 'Hata!',
+                        text: 'Bir hata oluştu. Lütfen tekrar deneyin.',
+                        icon: 'error',
+                        confirmButtonText: 'Tamam',
+                        confirmButtonColor: '#d33'
+                    });
+                });
+        });
+
+        // Validation mesajlarını göster
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('input', function () {
+                const errorSpan = this.nextElementSibling;
+                if (errorSpan && errorSpan.classList.contains('text-danger')) {
+                    errorSpan.textContent = '';
+                }
+            });
+        });
+
+        // Sayfa yüklendiğinde hoş geldin mesajı
+        document.addEventListener('DOMContentLoaded', function () {
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true
+            });
+
+            Toast.fire({
+                icon: 'info',
+                title: 'Hoş Geldiniz!'
+            });
+        });
+    </script>
+}

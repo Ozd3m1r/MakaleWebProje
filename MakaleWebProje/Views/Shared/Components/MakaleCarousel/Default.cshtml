@@ -1,21 +1,6 @@
-﻿@* @model IEnumerable<Makale>
-
-
-<div class="display-6 text-center">
-    <h6>ShowCase</h6>
-
-</div>
-<div class="row">
-
-    @foreach (var mak in Model)
-    {
-        <partial name="_MakaleCard" model="mak" />
-    }
-</div> *@
-@{
+﻿@{
     ViewData["Title"] = "Home Page";
 }
-
 
 <div class="container mt-5 animate__animated animate__slideInLeft">
     <div id="carouselExample" class="carousel slide mb-5" data-bs-ride="carousel">
@@ -29,7 +14,7 @@
                     <div class="d-flex justify-content-center align-items-center" style="height: 400px; background-color: #f8f9fa; border-radius: 10px;">
                         <div class="text-center">
                             <img src="@mak.MakaleImagesUrl" class="card-img-top" alt="@mak.MakaleName"
-                                 style="height: 200px; object-fit: cover;">
+                                 style="height: 250px; width: 100%; object-fit: cover;">
                             <h5>@mak.MakaleName</h5>
                             <p>@mak.MakaleSummary</p>
                             <a href="Makale/get/@mak.MakaleId" class="btn btn-primary mt-3">
@@ -54,7 +39,7 @@
     </div>
 
     <!-- ShowCase Bölümü -->
-  @*   <div class="showcase-section mt-5">
+    @*   <div class="showcase-section mt-5">
         <h2 class="text-center mb-4">Öne Çıkan Makaleler</h2>
         <div class="row g-4">
             @foreach (var mak in Model)
@@ -117,14 +102,24 @@
     }
 
     @@keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
+        from
 
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+    {
+        opacity: 0;
+        transform: translateY(20px);
     }
-</style> 
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+
+    /* Carousel resim boyutunu sabitlemek için ekleme */
+    .carousel-item img {
+        height: 250px; /* Sabit yükseklik */
+        width: 100%; /* Genişlik %100 olarak ayarlanır */
+        object-fit: cover; /* Resmin container'ı kaplamasını sağlar */
+    }
+</style>

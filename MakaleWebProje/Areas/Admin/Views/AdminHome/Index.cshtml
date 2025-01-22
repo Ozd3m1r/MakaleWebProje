@@ -1,153 +1,136 @@
-﻿@{
+﻿@using MakaleWebProje.Areas.Admin.Helpers
+@{
+    ViewData["Title"] = "Admin Panel";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
 
 <style>
-    /* Genel Stil */
-    body {
-        background-color: #2c2c2c; /* Koyu Gri Arka Plan */
-        color: #ffffff; /* Beyaz Yazılar */
-    }
-
-    .alert-info {
-        background-color: #444444; /* Daha Koyu Gri Uyarı Kutusu */
-        border: 1px solid #555555;
-        color: #ffffff;
-    }
-
     .card {
         border: none;
         border-radius: 8px;
         margin-bottom: 20px;
+        transition: transform 0.2s;
     }
 
-        .card.bg-primary {
-            background-color: #1e3a8a; /* Koyu Mavi */
+        .card:hover {
+            transform: translateY(-5px);
         }
 
-        .card.bg-success {
-            background-color: #166534; /* Koyu Yeşil */
-        }
+    .stats-icon {
+        font-size: 2rem;
+        margin-bottom: 10px;
+    }
 
-        .card.bg-warning {
-            background-color: #b45309; /* Koyu Turuncu */
-        }
+    .stats-title {
+        font-size: 1.1rem;
+        margin-bottom: 5px;
+    }
 
-        .card.bg-danger {
-            background-color: #b91c1c; /* Koyu Kırmızı */
-        }
-
-        .card .card-body {
-            padding: 20px;
-        }
-
-        .card h5 {
-            font-size: 1.2rem;
-            margin-bottom: 10px;
-        }
-
-        .card p {
-            font-size: 1rem;
-            margin: 0;
-        }
+    .stats-number {
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
 </style>
 
-<div class="alert alert-info">
-    <strong>Hoş geldiniz!</strong> Yönetim paneline erişim sağladınız.
+<div class="container-fluid">
+    <!-- Başlık ve Hoşgeldin Mesajı -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            @Html.Raw("<i class='fas fa-tachometer-alt'></i>") @* HTML Helper Kullanımı *@
+            Dashboard
+        </h1>
+        <div class="alert alert-info py-2 mb-0">
+            @Html.ActionLink("Yönetim Paneli", "Index", "AdminHome", null, new { @class = "alert-link" }) @* HTML Helper Kullanımı *@
+            'ne hoş geldiniz!
+        </div>
+    </div>
+
+    <!-- İstatistik Kartları -->
+    <div class="row">
+        <!-- Kullanıcılar Kartı (Custom HTML Helper) -->
+        <div class="col-xl-3 col-md-6">
+            @Html.StatisticsCard("Kullanıcılar", (int)ViewBag.UserCount, "fas fa-users", "bg-primary")
+        </div>
+
+        <!-- 1. Standart HTML Helper Kullanımı -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-success text-white shadow-sm">
+                <div class="card-body">
+                    <div class="stats-icon">
+                        @Html.Raw("<i class='fas fa-newspaper'></i>")
+                    </div>
+                    <div class="stats-title">Makaleler</div>
+                    <div class="stats-number">
+                        <h5>
+                            Toplam: <strong>@ViewBag.MakaleCount</strong>
+                        </h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Yorumlar Kartı (Custom Tag Helper) -->
+        <div class="col-xl-3 col-md-6">
+            <statistics title="Yorumlar"
+                        count="@ViewBag.CommentCount"
+                        icon="fas fa-comments"
+                        background-color="bg-warning">
+            </statistics>
+        </div>
+
+
+    <!-- Grafik -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="m-0 font-weight-bold">
+                        <i class="fas fa-chart-bar"></i> İstatistik Grafiği
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <canvas id="myChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+ 
 </div>
 
-<div class="row">
-    <div class="col-md-3">
-        <div class="card bg-warning text-white shadow-sm">
-            <div class="card-body">
-                <h5><i class="fas fa-users"></i> Kullanıcılar</h5>
-                <p>Toplam: <strong>11</strong></p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card bg-primary text-white shadow-sm">
-            <div class="card-body">
-                <h5><i class="fas fa-newspaper"></i> Makaleler</h5>
-                <p>Toplam: <strong>10</strong></p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card bg-success text-white shadow-sm">
-            <div class="card-body">
-                <h5><i class="fas fa-thumbs-up"></i> Beğeniler</h5>
-                <p>Toplam: <strong>13</strong></p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card bg-danger text-white shadow-sm">
-            <div class="card-body">
-                <h5><i class="fas fa-thumbs-down"></i> Beğenilmeyenler</h5>
-                <p>Toplam: <strong>12</strong></p>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Grafik Alanı -->
-<div class="mt-5">
-    <canvas id="myChart" width="400" height="150"></canvas>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    var ctx = document.getElementById('myChart').getContext('2d');
-    var myChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ['Kullanıcılar', 'Makaleler', 'Beğeniler', 'Beğenilmeyenler'],
-            datasets: [{
-                label: 'Toplam Sayılar',
-                data: [11, 10, 13, 12], // Verileri buraya ekleyin
-                backgroundColor: [
-                    '#b45309', // Koyu Turuncu
-                    '#1e3a8a', // Koyu Mavi
-                    '#166534', // Koyu Yeşil
-                    '#b91c1c'  // Koyu Kırmızı
-                ],
-                borderColor: [
-                    '#b45309',
-                    '#1e3a8a',
-                    '#166534',
-                    '#b91c1c'
-                ],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            plugins: {
-                legend: {
-                    labels: {
-                        color: '#ffffff' // Etiket rengi
-                    }
-                }
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        var ctx = document.getElementById('myChart').getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Kullanıcılar', 'Makaleler', 'Yorumlar',],
+                datasets: [{
+                    label: 'Site İstatistikleri',
+                    data: [
+        @ViewBag.UserCount,
+        @ViewBag.MakaleCount,
+        @ViewBag.CommentCount,
+        @(ViewBag.MakaleCount * 10)
+                            ],
+                    backgroundColor: [
+                        'rgba(54, 162, 235, 0.8)',
+                        'rgba(40, 167, 69, 0.8)',
+                        'rgba(255, 193, 7, 0.8)',
+                        'rgba(23, 162, 184, 0.8)'
+                    ],
+                    borderWidth: 1
+                }]
             },
-            scales: {
-                x: {
-                    ticks: {
-                        color: '#ffffff' // X ekseni yazı rengi
-                    },
-                    grid: {
-                        color: '#ffffff' // Dikey çizgi rengi
-                    }
-                },
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        color: '#ffffff' // Y ekseni yazı rengi
-                    },
-                    grid: {
-                        color: '#ffffff' // Yatay çizgi rengi
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
                     }
                 }
             }
-        }
-    });
-</script>
+        });
+    </script>
+}

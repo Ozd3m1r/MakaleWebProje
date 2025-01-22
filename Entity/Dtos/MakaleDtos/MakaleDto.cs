@@ -22,7 +22,7 @@ namespace Entities.Dtos.MakaleDtos
         public string MakaleSummary { get; set; }
 
         [Display(Name = "Makale Tarihi")]
-        public string MakaleDate { get; set; }
+        public string? MakaleDate { get; set; } = DateTime.Now.ToString();
 
         [Display(Name = "Gösterilsin mi?")]
         public bool MakaleIsShow { get; set; }
